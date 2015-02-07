@@ -57,7 +57,7 @@ iptables -A OUTPUT -o $NIC_BRIDGE -j ACCEPT
 ## OUTPUT
 iptables -A OUTPUT -p UDP -o eth0 --dport 53 -j ACCEPT
 iptables -A OUTPUT -p TCP -o eth0 --dport 80 -j ACCEPT
-iptables -A OUTPUT -p TCP -o eth0 --dport 433 -j ACCEPT
+iptables -A OUTPUT -p TCP -o eth0 --dport 443 -j ACCEPT
 
 #################################
 
