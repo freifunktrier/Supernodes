@@ -59,6 +59,11 @@ iptables -A OUTPUT -p UDP -o eth0 --dport 53 -j ACCEPT
 iptables -A OUTPUT -p TCP -o eth0 --dport 80 -j ACCEPT
 iptables -A OUTPUT -p TCP -o eth0 --dport 443 -j ACCEPT
 
+#OpenVPN uplink
+iptables -A OUTPUT -p UDP -o eth0 --dport 1194 -j ACCEPT
+
+#NTP uplink
+iptables -A OUTPUT -p UDP -o eth0 --dport 123  -d 192.168.101.49 -j ACCEPT
 #################################
 
 # Block all
