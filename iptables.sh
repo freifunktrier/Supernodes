@@ -1,6 +1,6 @@
 #!/bin/bash
 NIC_PUBLIC=eth0
-NIC_VPN=tap0
+NIC_VPN=tun0
 NIC_BRIDGE=br-fftr
 
 # Clear and Reset to Defaults
@@ -49,22 +49,32 @@ iptables -A INPUT -p TCP --dport 22 -i $NIC_PUBLIC -j ACCEPT
 
 # Allow DNS from all devices
 iptables -A INPUT -p UDP --dport 53 -i $NIC_PUBLIC -j ACCEPT
+iptables -A INPUT -p UDP --dport 53 -i $NIC_BRIDGE -j ACCEPT
 
 # Allow INPUT and OUTPUT Bridge Interface
 iptables -A INPUT -i $NIC_BRIDGE -j ACCEPT
 iptables -A OUTPUT -o $NIC_BRIDGE -j ACCEPT
 
 ## OUTPUT
-iptables -A OUTPUT -p UDP -o eth0 --dport 53 -j ACCEPT
-iptables -A OUTPUT -p TCP -o eth0 --dport 80 -j ACCEPT
-iptables -A OUTPUT -p TCP -o eth0 --dport 443 -j ACCEPT
-
+iptables -A OUTPUT -p UDP -o $NIC_PUBLIC --dport 53 -j ACCEPT
+iptables -A OUTPUT -p TCP -o $NIC_PUBLIC --dport 80 -j ACCEPT
+iptables -A OUTPUT -p TCP -o $NIC_PUBLIC --dport 443 -j ACCEPT
 #OpenVPN uplink
-iptables -A OUTPUT -p UDP -o eth0 --dport 1194 -j ACCEPT
-
+iptables -A OUTPUT -p UDP -o $NIC_PUBLIC --dport 1194 -j ACCEPT
 #NTP uplink
-iptables -A OUTPUT -p UDP -o eth0 --dport 123  -d 192.168.101.49 -j ACCEPT
+iptables -A OUTPUT -p UDP -o $NIC_PUBLIC --dport 123  -d 192.168.101.49 -j ACCEPT
+
+#DHCP in/out to serve our clients
+iptables -A INPUT  -p UDP -i $NIC_BRIDGE --sport 68 --dport 67 -j ACCEPT
+iptables -A OUTPUT -p UDP -o $NIC_BRIDGE --sport 67 --dport 68 -j ACCEPT
+
+#DHCP for our uplink
+iptables -A OUTPUT -p UDP -o $NIC_PUBLIC --sport 68 --dport 67 -j ACCEPT
 #################################
+
+# Allow mesh --> VPN and established backwards
+iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -j ACCEPT
+iptables -A FORWARD -i $NIC_VPN -p ALL -o $NIC_BRIDGE -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # Block all
 iptables -P INPUT DROP
