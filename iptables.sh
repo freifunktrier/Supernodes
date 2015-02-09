@@ -49,7 +49,9 @@ iptables -A INPUT -p TCP --dport 22 -i $NIC_PUBLIC -j ACCEPT
 
 # Allow DNS from all devices
 iptables -A INPUT -p UDP --dport 53 -i $NIC_PUBLIC -j ACCEPT
+iptables -A INPUT -p TCP --dport 53 -i $NIC_PUBLIC -j ACCEPT
 iptables -A INPUT -p UDP --dport 53 -i $NIC_BRIDGE -j ACCEPT
+iptables -A INPUT -p TCP --dport 53 -i $NIC_BRIDGE -j ACCEPT
 
 # Allow INPUT and OUTPUT Bridge Interface
 iptables -A INPUT -i $NIC_BRIDGE -j ACCEPT
@@ -57,6 +59,7 @@ iptables -A OUTPUT -o $NIC_BRIDGE -j ACCEPT
 
 ## OUTPUT
 iptables -A OUTPUT -p UDP -o $NIC_PUBLIC --dport 53 -j ACCEPT
+iptables -A OUTPUT -p TCP -o $NIC_PUBLIC --dport 53 -j ACCEPT
 iptables -A OUTPUT -p TCP -o $NIC_PUBLIC --dport 80 -j ACCEPT
 iptables -A OUTPUT -p TCP -o $NIC_PUBLIC --dport 443 -j ACCEPT
 #OpenVPN uplink
