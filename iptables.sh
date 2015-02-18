@@ -36,6 +36,13 @@ iptables -A OUTPUT -p ALL -o $NIC_PUBLIC -m state --state ESTABLISHED,RELATED -j
 iptables -A INPUT -p ALL -i $NIC_VPN -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A OUTPUT -p ALL -o $NIC_VPN -m state --state ESTABLISHED,RELATED -j ACCEPT
 
+# Usefull ICMP-Stuff
+for i in destination-unreachable echo-reply echo-request time-exceeded; do
+	iptables -A FORWARD -p ICMP --icmp-type $i -j ACCEPT
+	iptables -A INPUT -p ICMP --icmp-type $i -j ACCEPT
+	iptables -A OUTPUT -p ICMP --icmp-type $i -j ACCEPT
+done
+
 #################################
 
 ## INPUT
