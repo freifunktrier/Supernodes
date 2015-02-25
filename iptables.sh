@@ -36,6 +36,11 @@ iptables -A OUTPUT -p ALL -o $NIC_PUBLIC -m state --state ESTABLISHED,RELATED -j
 iptables -A INPUT -p ALL -i $NIC_VPN -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A OUTPUT -p ALL -o $NIC_VPN -m state --state ESTABLISHED,RELATED -j ACCEPT
 
+# Allow mesh --> VPN
+iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -j ACCEPT
+# Allow existing connections to find their way back
+iptables -A FORWARD -i $NIC_VPN -p ALL -o $NIC_BRIDGE -m state --state ESTABLISHED,RELATED -j ACCEPT
+
 # Usefull ICMP-Stuff
 for i in destination-unreachable echo-reply echo-request time-exceeded; do
 	iptables -A FORWARD -p ICMP --icmp-type $i -j ACCEPT
@@ -47,11 +52,11 @@ done
 
 ## INPUT
 
-# TCP/UDP Port 10000
+# TCP/UDP Port 10000 (fastd)
 iptables -A INPUT -p TCP --dport 10000 -i $NIC_PUBLIC -j ACCEPT
 iptables -A INPUT -p UDP --dport 10000 -i $NIC_PUBLIC -j ACCEPT
 
-# TCP Port 22
+# TCP Port 22 (SSH)
 iptables -A INPUT -p TCP --dport 22 -i $NIC_PUBLIC -j ACCEPT
 
 # Allow DNS from all devices
@@ -64,27 +69,31 @@ iptables -A INPUT -p TCP --dport 53 -i $NIC_BRIDGE -j ACCEPT
 iptables -A INPUT -i $NIC_BRIDGE -j ACCEPT
 iptables -A OUTPUT -o $NIC_BRIDGE -j ACCEPT
 
+#DHCP out to serve our clients
+iptables -A INPUT  -p UDP -i $NIC_BRIDGE --sport 68 --dport 67 -j ACCEPT
+
 ## OUTPUT
+
+#DNS
 iptables -A OUTPUT -p UDP -o $NIC_PUBLIC --dport 53 -j ACCEPT
 iptables -A OUTPUT -p TCP -o $NIC_PUBLIC --dport 53 -j ACCEPT
+
+#HTTP(S) for Updates and Git
 iptables -A OUTPUT -p TCP -o $NIC_PUBLIC --dport 80 -j ACCEPT
 iptables -A OUTPUT -p TCP -o $NIC_PUBLIC --dport 443 -j ACCEPT
+
 #OpenVPN uplink
 iptables -A OUTPUT -p UDP -o $NIC_PUBLIC --dport 1194 -j ACCEPT
 #NTP uplink
 iptables -A OUTPUT -p UDP -o $NIC_PUBLIC --dport 123  -d 192.168.101.49 -j ACCEPT
 
-#DHCP in/out to serve our clients
-iptables -A INPUT  -p UDP -i $NIC_BRIDGE --sport 68 --dport 67 -j ACCEPT
+#DHCP out to serve our clients
 iptables -A OUTPUT -p UDP -o $NIC_BRIDGE --sport 67 --dport 68 -j ACCEPT
 
 #DHCP for our uplink
 iptables -A OUTPUT -p UDP -o $NIC_PUBLIC --sport 68 --dport 67 -j ACCEPT
 #################################
 
-# Allow mesh --> VPN and established backwards
-iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -j ACCEPT
-iptables -A FORWARD -i $NIC_VPN -p ALL -o $NIC_BRIDGE -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # Block all
 iptables -P INPUT DROP
