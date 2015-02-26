@@ -114,7 +114,11 @@ iptables -A OUTPUT -p TCP -o $NIC_IC --dport 179 -j ACCEPT
 iptables -A OUTPUT -p UDP -o $NIC_IC --dport 179 -j ACCEPT
 #################################
 
-# Reject all (we do NOT block. block is rude)
-iptables -P INPUT REJECT
-iptables -P FORWARD REJECT
-iptables -P OUTPUT REJECT
+#reject everything that did not match any previous
+iptables -A INPUT -j REJECT
+iptables -A FORWARD -j REJECT
+iptables -A INPUT -j REJECT
+# Drop the rest (reject is not possible here and there should be no rest anyway)
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT DROP
