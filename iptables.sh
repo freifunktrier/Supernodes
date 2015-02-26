@@ -2,6 +2,7 @@
 NIC_PUBLIC=eth0
 NIC_VPN=tun0
 NIC_BRIDGE=br-fftr
+NIC_IC=icvpn
 
 # Clear and Reset to Defaults
 iptables -P INPUT ACCEPT
@@ -56,12 +57,16 @@ done
 iptables -A INPUT -p TCP --dport 10000 -i $NIC_PUBLIC -j ACCEPT
 iptables -A INPUT -p UDP --dport 10000 -i $NIC_PUBLIC -j ACCEPT
 
+# TCP/UDP Port 655 (tinc)
+iptables -A INPUT -p TCP --dport 655 -i $NIC_PUBLIC -j ACCEPT
+iptables -A INPUT -p UDP --dport 655 -i $NIC_PUBLIC -j ACCEPT
+
 # TCP Port 22 (SSH)
 iptables -A INPUT -p TCP --dport 22 -i $NIC_PUBLIC -j ACCEPT
 
-# Allow DNS from all devices
-iptables -A INPUT -p UDP --dport 53 -i $NIC_PUBLIC -j ACCEPT
-iptables -A INPUT -p TCP --dport 53 -i $NIC_PUBLIC -j ACCEPT
+# Allow DNS from IC and Mesh
+iptables -A INPUT -p UDP --dport 53 -i $NIC_IC -j ACCEPT
+iptables -A INPUT -p TCP --dport 53 -i $NIC_IC -j ACCEPT
 iptables -A INPUT -p UDP --dport 53 -i $NIC_BRIDGE -j ACCEPT
 iptables -A INPUT -p TCP --dport 53 -i $NIC_BRIDGE -j ACCEPT
 
@@ -71,6 +76,10 @@ iptables -A OUTPUT -o $NIC_BRIDGE -j ACCEPT
 
 #DHCP out to serve our clients
 iptables -A INPUT  -p UDP -i $NIC_BRIDGE --sport 68 --dport 67 -j ACCEPT
+
+#allow IC-BGP
+iptables -A INPUT -p TCP -i $NIC_IC --dport 179 -j ACCEPT
+iptables -A INPUT -p UDP -i $NIC_IC --dport 179 -j ACCEPT
 
 ## OUTPUT
 
@@ -92,10 +101,17 @@ iptables -A OUTPUT -p UDP -o $NIC_BRIDGE --sport 67 --dport 68 -j ACCEPT
 
 #DHCP for our uplink
 iptables -A OUTPUT -p UDP -o $NIC_PUBLIC --sport 68 --dport 67 -j ACCEPT
+
+# allow every TCP/UDP output, because tinc will use any port any city decides to use to connect to that city
+iptables -A OUTPUT -p TCP -o $NIC_PUBLIC -j ACCEPT
+iptables -A OUTPUT -p UDP -o $NIC_PUBLIC -j ACCEPT
+
+# allow IC-BGP
+iptables -A OUTPUT -p TCP -o $NIC_IC --dport 179 -j ACCEPT
+iptables -A OUTPUT -p UDP -o $NIC_IC --dport 179 -j ACCEPT
 #################################
 
-
-# Block all
-iptables -P INPUT DROP
-iptables -P FORWARD DROP
-iptables -P OUTPUT DROP
+# Reject all (we do NOT block. block is rude)
+iptables -P INPUT REJECT
+iptables -P FORWARD REJECT
+iptables -P OUTPUT REJECT
