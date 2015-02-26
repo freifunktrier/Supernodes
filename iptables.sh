@@ -84,25 +84,10 @@ iptables -A INPUT -p UDP -i $NIC_IC --dport 179 -j ACCEPT
 ## OUTPUT
 
 #DNS
-iptables -A OUTPUT -p UDP -o $NIC_PUBLIC --dport 53 -j ACCEPT
-iptables -A OUTPUT -p TCP -o $NIC_PUBLIC --dport 53 -j ACCEPT
-
-#HTTP(S) for Updates and Git
-iptables -A OUTPUT -p TCP -o $NIC_PUBLIC --dport 80 -j ACCEPT
-iptables -A OUTPUT -p TCP -o $NIC_PUBLIC --dport 443 -j ACCEPT
-
-#OpenVPN uplink
-iptables -A OUTPUT -p UDP -o $NIC_PUBLIC --dport 1194 -j ACCEPT
-#NTP uplink
-iptables -A OUTPUT -p UDP -o $NIC_PUBLIC --dport 123  -d 192.168.101.49 -j ACCEPT
-
 #DHCP out to serve our clients
 iptables -A OUTPUT -p UDP -o $NIC_BRIDGE --sport 67 --dport 68 -j ACCEPT
 
-#DHCP for our uplink
-iptables -A OUTPUT -p UDP -o $NIC_PUBLIC --sport 68 --dport 67 -j ACCEPT
-
-# allow every TCP/UDP output, because tinc will use any port any city decides to use to connect to that city
+# allow every TCP/UDP output on public, because tinc will use any port any city decides to use to connect to that city
 iptables -A OUTPUT -p TCP -o $NIC_PUBLIC -j ACCEPT
 iptables -A OUTPUT -p UDP -o $NIC_PUBLIC -j ACCEPT
 
