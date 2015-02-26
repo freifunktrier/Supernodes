@@ -37,14 +37,25 @@ iptables -A OUTPUT -p ALL -o $NIC_PUBLIC -m state --state ESTABLISHED,RELATED -j
 iptables -A INPUT -p ALL -i $NIC_VPN -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A OUTPUT -p ALL -o $NIC_VPN -m state --state ESTABLISHED,RELATED -j ACCEPT
 
+iptables -A INPUT -p ALL -i $NIC_IC -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A OUTPUT -p ALL -o $NIC_IC -m state --state ESTABLISHED,RELATED -j ACCEPT
+
 # Allow mesh --> VPN
 iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -j ACCEPT
 # Allow existing connections to find their way back
 iptables -A FORWARD -i $NIC_VPN -p ALL -o $NIC_BRIDGE -m state --state ESTABLISHED,RELATED -j ACCEPT
 
+# Allow mesh <--> IC
+iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -j ACCEPT
+iptables -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -j ACCEPT
+
 # Usefull ICMP-Stuff
 for i in destination-unreachable echo-reply echo-request time-exceeded; do
-	iptables -A FORWARD -p ICMP --icmp-type $i -j ACCEPT
+	iptables -A FORWARD -p ICMP -i $NIC_VPN -o $NIC_BRIDGE --icmp-type $i -j ACCEPT
+	iptables -A FORWARD -p ICMP -i $NIC_BRIDGE -o $NIC_VPN --icmp-type $i -j ACCEPT
+
+	#do not allow ICMP between VPN and IC
+
 	iptables -A INPUT -p ICMP --icmp-type $i -j ACCEPT
 	iptables -A OUTPUT -p ICMP --icmp-type $i -j ACCEPT
 done
@@ -70,7 +81,14 @@ iptables -A INPUT -p TCP --dport 53 -i $NIC_IC -j ACCEPT
 iptables -A INPUT -p UDP --dport 53 -i $NIC_BRIDGE -j ACCEPT
 iptables -A INPUT -p TCP --dport 53 -i $NIC_BRIDGE -j ACCEPT
 
+# Allow HTTP from IC and Mesh
+iptables -A INPUT -p UDP --dport 80 -i $NIC_IC -j ACCEPT
+iptables -A INPUT -p TCP --dport 80 -i $NIC_IC -j ACCEPT
+iptables -A INPUT -p UDP --dport 80 -i $NIC_BRIDGE -j ACCEPT
+iptables -A INPUT -p TCP --dport 80 -i $NIC_BRIDGE -j ACCEPT
+
 # Allow INPUT and OUTPUT Bridge Interface
+#TODO: remove this rules, add allow rules for established+related connections, ping, speedtest, 80tcp, 53udp/tcp, router-advertisement-zeug, ntp
 iptables -A INPUT -i $NIC_BRIDGE -j ACCEPT
 iptables -A OUTPUT -o $NIC_BRIDGE -j ACCEPT
 
