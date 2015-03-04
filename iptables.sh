@@ -102,6 +102,11 @@ iptables -A INPUT -p UDP -i $NIC_IC --dport 179 -j ACCEPT
 ## OUTPUT
 
 #DNS
+iptables -A OUTPUT -p UDP -o $NIC_IC --dport 53 -j ACCEPT
+iptables -A OUTPUT -p TCP -o $NIC_IC --dport 53 -j ACCEPT
+iptables -A OUTPUT -p UDP -o $NIC_PUBLIC --dport 53 -j ACCEPT
+iptables -A OUTPUT -p TCP -o $NIC_PUBLIC --dport 53 -j ACCEPT
+
 #DHCP out to serve our clients
 iptables -A OUTPUT -p UDP -o $NIC_BRIDGE --sport 67 --dport 68 -j ACCEPT
 
