@@ -1,0 +1,43 @@
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+allow-hotplug eth0
+iface eth0 inet static
+        address 10.14.8.42
+        netmask 255.255.255.0
+        network 10.14.8.0
+        broadcast 10.14.8.255
+        gateway 10.14.8.1
+        dns-nameservers 8.8.8.8
+auto br-fftr
+  iface br-fftr inet6 static
+  bridge-ports none
+  address 2001:bf7:fc0f::12
+  netmask 64
+
+iface br-fftr inet static
+  address 10.172.0.12
+  netmask 255.255.0.0
+  allow-hotplug bat0
+
+iface fftr-mesh-vpn inet6 manual
+  hwaddress 26:61:96:60:17:dd
+
+iface bat0 inet6 manual
+  pre-up modprobe libcrc32c
+  pre-up modprobe batman-adv
+  pre-up batctl if add fftr-mesh-vpn
+  up ip link set $IFACE up
+  post-up brctl addif br-fftr $IFACE
+  post-up batctl it 10000
+#  post-up batctl gw server
+  post-up /sbin/ip rule add from all fwmark 0x1 table 42
+  pre-down brctl delif br-fftr $IFACE || true
+  down ip link set $IFACE down
+  post-up start-stop-daemon -b --start --exec /home/freifunk/downloads/alfred/alfred-2014.4.0/alfred -- -m -i br-fftr;
+  post-up start-stop-daemon -b --start --exec /home/freifunk/downloads/alfred/alfred-2014.4.0/vis/batadv-vis -- -si bat0;
