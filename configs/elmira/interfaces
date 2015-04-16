@@ -41,3 +41,16 @@ iface bat0 inet6 manual
   down ip link set $IFACE down
   post-up start-stop-daemon -b --start --exec /home/freifunk/downloads/alfred/alfred-2014.4.0/alfred -- -m -i br-fftr;
   post-up start-stop-daemon -b --start --exec /home/freifunk/downloads/alfred/alfred-2014.4.0/vis/batadv-vis -- -si bat0;
+
+iface fftr-gw-anycast inet static
+        address 10.172.0.10
+        pre-up ip link add link br-fftr name fftr-gw-anycast type macvlan || true
+        up ip link set $IFACE up
+        down ip link set $IFACE down
+        hwaddress ether 26:61:96:60:00:dc
+
+iface fftr-gw-anycast inet6 static
+        address 2001:bf7:fc0f::10/128
+        up ifconfig $IFACE inet6 add fe80::1 #bird likes routing via link local, so we give it a nice link local to route via
+        #disable dublicate address detection because we do want dublicate adresses
+        dad-attempts 0
