@@ -44,8 +44,9 @@ iface bat0 inet6 manual
 
 iface fftr-gw-anycast inet static
         address 10.172.0.10
-		netmask 255.255.0.0
-        pre-up ip link add link br-fftr name fftr-gw-anycast type macvlan || true
+        netmask 255.255.0.0
+        #pre-up ip link add link br-fftr name fftr-gw-anycast type macvlan || true
+		pre-up ip link add link bat0 name fftr-gw-anycast type macvlan || true
         up ip link set $IFACE up
         down ip link set $IFACE down
         hwaddress ether 26:61:96:60:00:dc
