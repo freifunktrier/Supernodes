@@ -54,15 +54,6 @@ iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -j ACCEPT
 
 # Usefull ICMP-Stuff
 for i in destination-unreachable echo-reply echo-request time-exceeded; do
-	iptables -A FORWARD -p ICMP -i $NIC_IC -o $NIC_BRIDGE --icmp-type $i -j ACCEPT
-	iptables -A FORWARD -p ICMP -i $NIC_BRIDGE -o $NIC_IC --icmp-type $i -j ACCEPT
-
-
-	iptables -A FORWARD -p ICMP -i $NIC_VPN -o $NIC_BRIDGE --icmp-type $i -j ACCEPT
-	iptables -A FORWARD -p ICMP -i $NIC_BRIDGE -o $NIC_VPN --icmp-type $i -j ACCEPT
-
-	#do not allow ICMP between VPN and IC
-
 	iptables -A INPUT -p ICMP --icmp-type $i -j ACCEPT
 	iptables -A OUTPUT -p ICMP --icmp-type $i -j ACCEPT
 done
