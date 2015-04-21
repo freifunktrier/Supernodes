@@ -49,6 +49,9 @@ iptables -A FORWARD -i $NIC_VPN -p ALL -o $NIC_BRIDGE -m state --state ESTABLISH
 iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -j ACCEPT
 iptables -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -j ACCEPT
 
+# Allow mesh <--> mesh
+iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -j ACCEPT
+
 # Usefull ICMP-Stuff
 for i in destination-unreachable echo-reply echo-request time-exceeded; do
 	iptables -A FORWARD -p ICMP -i $NIC_IC -o $NIC_BRIDGE --icmp-type $i -j ACCEPT
