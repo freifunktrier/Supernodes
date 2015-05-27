@@ -125,3 +125,31 @@ iptables -A INPUT -j REJECT
 iptables -P INPUT DROP
 iptables -P FORWARD DROP
 iptables -P OUTPUT DROP
+
+#ipv6
+ip6tables -P INPUT ACCEPT
+ip6tables -P FORWARD ACCEPT
+ip6tables -P OUTPUT ACCEPT
+ip6tables -t nat -P PREROUTING ACCEPT
+ip6tables -t nat -P POSTROUTING ACCEPT
+ip6tables -t nat -P OUTPUT ACCEPT
+ip6tables -t mangle -P PREROUTING ACCEPT
+ip6tables -t mangle -P OUTPUT ACCEPT
+
+# Flush all rules
+ip6tables -F
+ip6tables -t nat -F
+ip6tables -t mangle -F
+
+# Erease all non-default chains
+ip6tables -X
+ip6tables -t nat -X
+ip6tables -t mangle -X
+
+#reject traffic to/from routers
+for i in $(/root/alfred-json/src/alfred-json -r 158 -z | jq '.[] | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}'); do
+	ip6tables -A INPUT -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
+	ip6tables -A OUTPUT -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
+	ip6tables -A FORWARD -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
+	ip6tables -A FORWARD -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
+done
