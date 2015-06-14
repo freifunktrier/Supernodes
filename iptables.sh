@@ -152,7 +152,7 @@ ip6tables -t nat -X
 ip6tables -t mangle -X
 
 #reject traffic to/from routers
-for i in $(/root/alfred-json/src/alfred-json -r 158 -z | jq '.[] | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' | grep -v -F -f /root/Supernodes-dynamic/iptables-whitelist); do
+for i in $(/root/alfred-json/src/alfred-json -r 158 -z | jq '.[] | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' | grep -v -F -f /root/Supernodes-dynamic/iptables-whitelist); do
 	ip6tables -A INPUT -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
 	ip6tables -A OUTPUT -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
 	ip6tables -A FORWARD -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
