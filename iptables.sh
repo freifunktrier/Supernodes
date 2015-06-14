@@ -41,20 +41,20 @@ iptables -A INPUT -p ALL -i $NIC_IC -m state --state ESTABLISHED,RELATED -j ACCE
 iptables -A OUTPUT -p ALL -o $NIC_IC -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # Allow mesh --> VPN
-iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1360
+iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
 iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -j ACCEPT
 # Allow existing connections to find their way back
-iptables -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1360
+iptables -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
 iptables -A FORWARD -i $NIC_VPN -p ALL -o $NIC_BRIDGE -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # Allow mesh <--> IC
-iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1360
+iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
 iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -j ACCEPT
-iptables -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1360
+iptables -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
 iptables -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -j ACCEPT
 
 # Allow mesh <--> mesh
-iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1360
+iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
 iptables -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -j ACCEPT
 
 # Usefull ICMP-Stuff
@@ -159,8 +159,8 @@ for i in $(/root/alfred-json/src/alfred-json -r 158 -z | jq '.[] | {network} | .
 	ip6tables -A FORWARD -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
 done
 
-ip6tables -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1360
-ip6tables -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1360
-ip6tables -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1360
-ip6tables -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1360
-ip6tables -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1360
+ip6tables -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
+ip6tables -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
+ip6tables -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
+ip6tables -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
+ip6tables -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
