@@ -67,9 +67,11 @@ done
 
 ## INPUT
 
-# TCP/UDP Port 10000 (fastd)
+# TCP/UDP Port 10000/10001 (fastd)
 iptables -A INPUT -p TCP --dport 10000 -i $NIC_PUBLIC -j ACCEPT
 iptables -A INPUT -p UDP --dport 10000 -i $NIC_PUBLIC -j ACCEPT
+iptables -A INPUT -p TCP --dport 10001 -i $NIC_PUBLIC -j ACCEPT
+iptables -A INPUT -p UDP --dport 10001 -i $NIC_PUBLIC -j ACCEPT
 
 # TCP/UDP Port 655 (tinc)
 iptables -A INPUT -p TCP --dport 655 -i $NIC_PUBLIC -j ACCEPT
