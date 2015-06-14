@@ -158,3 +158,9 @@ for i in $(/root/alfred-json/src/alfred-json -r 158 -z | jq '.[] | {network} | .
 	ip6tables -A FORWARD -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
 	ip6tables -A FORWARD -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
 done
+
+ip6tables -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1360
+ip6tables -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1360
+ip6tables -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1360
+ip6tables -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1360
+ip6tables -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1360
