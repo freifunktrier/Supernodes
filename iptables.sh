@@ -98,6 +98,15 @@ addrule -A OUTPUT -o lo -j ACCEPT
 addrule -A INPUT -d 127.0.0.1 -j ACCEPT
 addrule -A OUTPUT -s 127.0.0.1 -j ACCEPT
 
+addrule -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000,10001,1723 -m comment --comment "ACC-fastd"
+addrule -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000,10001,1723 -m comment --comment "ACC-fastd"
+
+addrule -A INPUT  -i $NIC_PUBLIC -p UDP --destination-port 655 -m comment --comment "ACC-tincudp"
+addrule -A OUTPUT -o $NIC_PUBLIC -p UDP --source-port      655 -m comment --comment "ACC-tincudp"
+
+addrule -A INPUT  -i $NIC_PUBLIC -p TCP --destination-port 655 -m comment --comment "ACC-tinctcp"
+addrule -A OUTPUT -o $NIC_PUBLIC -p TCP --source-port      655 -m comment --comment "ACC-tinctcp"
+
 # Established, Related
 addrule -A INPUT -p ALL -i $NIC_PUBLIC -m state --state ESTABLISHED,RELATED -j ACCEPT
 addrule -A OUTPUT -p ALL -o $NIC_PUBLIC -m state --state ESTABLISHED,RELATED -j ACCEPT
@@ -225,7 +234,7 @@ addrule -P OUTPUT DROP
 
 #reject traffic to/from routers
 /root/alfred-json/src/alfred-json -r 158 -z | jq '.[] | select(.supernode.ipv6fw == false) | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' > /tmp/ipv6-whitelist
-cat /root/Supernodes-dynamic/addrule-whitelist >> /tmp/ipv6-whitelist
+cat /root/Supernodes-dynamic/iptables-whitelist >> /tmp/ipv6-whitelist
 for i in $(/root/alfred-json/src/alfred-json -r 158 -z | jq '.[] | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' | grep -v -F -f /tmp/ipv6-whitelist); do
 	addrule6 -A INPUT -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
 	addrule6 -A OUTPUT -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
