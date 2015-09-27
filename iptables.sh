@@ -20,26 +20,27 @@ formatrule() {
 }
 
 rulefile="$(mktemp)"
+counterfile="$(mktemp)"
 echo "
 *mangle
-:PREROUTING ACCEPT
-:INPUT ACCEPT
-:FORWARD ACCEPT
-:OUTPUT ACCEPT
-:POSTROUTING ACCEPT
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
 COMMIT
 
 *nat
-:PREROUTING ACCEPT
-:INPUT ACCEPT
-:OUTPUT ACCEPT
-:POSTROUTING ACCEPT
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
 COMMIT
 
 *filter
-:INPUT DROP
-:FORWARD DROP
-:OUTPUT DROP
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT DROP [0:0]
 " > $rulefile
 addrule() {
 	formatrule "$@" >> $rulefile
@@ -48,24 +49,24 @@ addrule() {
 rulefile6="$(mktemp)"
 echo "
 *mangle
-:PREROUTING ACCEPT
-:INPUT ACCEPT
-:FORWARD ACCEPT
-:OUTPUT ACCEPT
-:POSTROUTING ACCEPT
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
 COMMIT
 
 *nat
-:PREROUTING ACCEPT
-:INPUT ACCEPT
-:OUTPUT ACCEPT
-:POSTROUTING ACCEPT
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
 COMMIT
 
 *filter
-:INPUT ACCEPT
-:FORWARD ACCEPT
-:OUTPUT ACCEPT
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
 " > $rulefile6
 addrule6() {
 	formatrule "$@" >> $rulefile6
@@ -98,14 +99,24 @@ addrule -A OUTPUT -o lo -j ACCEPT
 addrule -A INPUT -d 127.0.0.1 -j ACCEPT
 addrule -A OUTPUT -s 127.0.0.1 -j ACCEPT
 
+iptables-save -c > $counterfile
+
+echo -n "$(grep "INPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile
 addrule -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000,10001,1723 -m comment --comment "ACC-fastd"
+echo -n "$(grep "OUTPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile
 addrule -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000,10001,1723 -m comment --comment "ACC-fastd"
 
+echo -n "$(grep "INPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile
 addrule -A INPUT  -i $NIC_PUBLIC -p UDP --destination-port 655 -m comment --comment "ACC-tincudp"
+echo -n "$(grep "OUTPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile
 addrule -A OUTPUT -o $NIC_PUBLIC -p UDP --source-port      655 -m comment --comment "ACC-tincudp"
 
+echo -n "$(grep "INPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile
 addrule -A INPUT  -i $NIC_PUBLIC -p TCP --destination-port 655 -m comment --comment "ACC-tinctcp"
+echo -n "$(grep "OUTPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile
 addrule -A OUTPUT -o $NIC_PUBLIC -p TCP --source-port      655 -m comment --comment "ACC-tinctcp"
+
+rm $counterfile
 
 # Established, Related
 addrule -A INPUT -p ALL -i $NIC_PUBLIC -m state --state ESTABLISHED,RELATED -j ACCEPT
@@ -171,6 +182,9 @@ addrule -A INPUT -p TCP --dport 80 -i $NIC_IC -j ACCEPT
 addrule -A INPUT -p UDP --dport 80 -i $NIC_BRIDGE -j ACCEPT
 addrule -A INPUT -p TCP --dport 80 -i $NIC_BRIDGE -j ACCEPT
 
+addrule -A INPUT -p TCP --dport 443 -i $NIC_IC -j ACCEPT
+addrule -A INPUT -p TCP --dport 443 -i $NIC_BRIDGE -j ACCEPT
+
 # Allow INPUT and OUTPUT Bridge Interface
 #TODO: remove this rules, add allow rules for established+related connections, ping, speedtest, 80tcp, 53udp/tcp, router-advertisement-zeug, ntp
 addrule -A INPUT -i $NIC_BRIDGE -j ACCEPT
@@ -212,6 +226,19 @@ addrule -P INPUT DROP
 addrule -P FORWARD DROP
 addrule -P OUTPUT DROP
 
+echo "COMMIT" >> $rulefile
+if iptables-restore -c -t $rulefile ; then
+  echo "iptables restore test successful, applying rules..."
+  iptables-restore -c -v $rulefile
+  rm $rulefile
+else
+  echo "iptables test failed. Rule file:" >&2
+  echo "---" >&2
+  cat $rulefile >&2
+  rm $rulefile
+  exit 1
+fi
+
 #ipv6
 #addrule6 -P INPUT ACCEPT
 #addrule6 -P FORWARD ACCEPT
@@ -249,23 +276,29 @@ addrule6 -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j 
 addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
 
 
-echo "COMMIT" >> $rulefile
-if iptables-restore -t $rulefile ; then
-  echo "iptables restore test successful, applying rules..."
-  iptables-restore -v $rulefile
-  rm $rulefile
-else
-  echo "iptables test failed. Rule file:" >&2
-  echo "---" >&2
-  cat $rulefile >&2
-  rm $rulefile
-  exit 1
-fi
+ip6tables-save -c > $counterfile
+
+echo -n "$(grep "INPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile6
+addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000,10001,1723 -m comment --comment "ACC-fastd"
+echo -n "$(grep "OUTPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile6
+addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000,10001,1723 -m comment --comment "ACC-fastd"
+
+echo -n "$(grep "INPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
+addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP --destination-port 655 -m comment --comment "ACC-tincudp"
+echo -n "$(grep "OUTPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
+addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP --source-port      655 -m comment --comment "ACC-tincudp"
+
+echo -n "$(grep "INPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
+addrule6 -A INPUT  -i $NIC_PUBLIC -p TCP --destination-port 655 -m comment --comment "ACC-tinctcp"
+echo -n "$(grep "OUTPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
+addrule6 -A OUTPUT -o $NIC_PUBLIC -p TCP --source-port      655 -m comment --comment "ACC-tinctcp"
+
+rm $counterfile
 
 echo "COMMIT" >> $rulefile6
-if ip6tables-restore -t $rulefile6 ; then
+if ip6tables-restore -c -t $rulefile6 ; then
   echo "ip6tables restore test successful, applying rules..."
-  ip6tables-restore -v $rulefile6
+  ip6tables-restore -c -v $rulefile6
   rm $rulefile6
 else
   echo "ip6tables test failed. Rule file:" >&2
