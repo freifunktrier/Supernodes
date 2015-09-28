@@ -3,6 +3,15 @@ NIC_PUBLIC=eth0
 NIC_VPN=tun0
 NIC_BRIDGE=br-fftr
 NIC_IC=icvpn
+ALFRED_JSON=""
+
+if [ ! -f "$ALFRED_JSON" ]; then
+	ALFRED_JSON="/root/alfred-json/src/alfred-json"
+fi
+
+if [ ! -f "$ALFRED_JSON" ]; then
+	ALFRED_JSON="/usr/local/src/alfred-json/build/src/alfred-json"
+fi
 
 #Thank you http://www.semicomplete.com/blog/geekery/atomic-iptables-changes-and-not-dropping-packets.html
 formatrule() {
@@ -260,9 +269,8 @@ fi
 #addrule6 -t mangle -X
 
 #reject traffic to/from routers
-/root/alfred-json/src/alfred-json -r 158 -z | jq '.[] | select(.supernode.ipv6fw == false) | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' > /tmp/ipv6-whitelist
-cat /root/Supernodes-dynamic/iptables-whitelist >> /tmp/ipv6-whitelist
-for i in $(/root/alfred-json/src/alfred-json -r 158 -z | jq '.[] | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' | grep -v -F -f /tmp/ipv6-whitelist); do
+$ALFRED_JSON -r 158 -z | jq '.[] | select(.supernode.ipv6fw == false) | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' > /tmp/ipv6-whitelist
+for i in $($ALFRED_JSON -r 158 -z | jq '.[] | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' | grep -v -F -f /tmp/ipv6-whitelist); do
 	addrule6 -A INPUT -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
 	addrule6 -A OUTPUT -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
 	addrule6 -A FORWARD -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
