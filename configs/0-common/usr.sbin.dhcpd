@@ -3,3 +3,4 @@
 
 #allow dhcpd to read its config from git
 /root/Supernodes/configs/*/dhcpd.conf r,
+/var/lib/Supernodes/configs/*/dhcpd.conf r,
