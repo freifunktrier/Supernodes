@@ -206,6 +206,8 @@ addrule -A INPUT  -p UDP -i $NIC_BRIDGE --sport 68 --dport 67 -j ACCEPT
 addrule -A INPUT -p TCP -i $NIC_IC --dport 179 -j ACCEPT
 addrule -A INPUT -p UDP -i $NIC_IC --dport 179 -j ACCEPT
 
+#allow 6in4
+addrule -A INPUT -p ipv6 -i $NIC_PUBLIC -j ACCEPT
 ## OUTPUT
 
 #DNS
@@ -224,6 +226,9 @@ addrule -A OUTPUT -p UDP -o $NIC_PUBLIC -j ACCEPT
 # allow IC-BGP
 addrule -A OUTPUT -p TCP -o $NIC_IC --dport 179 -j ACCEPT
 addrule -A OUTPUT -p UDP -o $NIC_IC --dport 179 -j ACCEPT
+
+#allow 6in4
+addrule -A OUTPUT -p ipv6 -o $NIC_PUBLIC -j ACCEPT
 #################################
 
 #reject everything that did not match any previous
