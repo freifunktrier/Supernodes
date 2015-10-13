@@ -2,6 +2,7 @@
 NIC_PUBLIC=eth0
 NIC_VPN=tun0
 NIC_BRIDGE=br-fftr
+NIC_ANYCAST=fftr-gw-anycast
 NIC_IC=icvpn
 ALFRED_JSON=""
 
@@ -140,9 +141,13 @@ addrule -A OUTPUT -p ALL -o $NIC_IC -m state --state ESTABLISHED,RELATED -j ACCE
 # Allow mesh --> VPN
 addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
 addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -j ACCEPT
+addrule -A FORWARD -i $NIC_ANYCAST -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
+addrule -A FORWARD -i $NIC_ANYCAST -o $NIC_VPN -j ACCEPT
 # Allow existing connections to find their way back
 addrule -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
 addrule -A FORWARD -i $NIC_VPN -p ALL -o $NIC_BRIDGE -m state --state ESTABLISHED,RELATED -j ACCEPT
+addrule -A FORWARD -i $NIC_VPN -o $NIC_ANYCAST -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
+addrule -A FORWARD -i $NIC_VPN -p ALL -o $NIC_ANYCAST -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # Allow mesh <--> IC
 addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
@@ -150,9 +155,16 @@ addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -j ACCEPT
 addrule -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
 addrule -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -j ACCEPT
 
+addrule -A FORWARD -i $NIC_ANYCAST -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
+addrule -A FORWARD -i $NIC_ANYCAST -o $NIC_IC -j ACCEPT
+addrule -A FORWARD -i $NIC_IC -o $NIC_ANYCAST -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
+addrule -A FORWARD -i $NIC_IC -o $NIC_ANYCAST -j ACCEPT
+
 # Allow mesh <--> mesh
 addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
 addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -j ACCEPT
+addrule -A FORWARD -i $NIC_ANYCAST -o $NIC_ANYCAST -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
+addrule -A FORWARD -i $NIC_ANYCAST -o $NIC_ANYCAST -j ACCEPT
 
 # Usefull ICMP-Stuff
 for i in destination-unreachable echo-reply echo-request time-exceeded; do
@@ -184,20 +196,27 @@ addrule -A INPUT -p UDP --dport 53 -i $NIC_IC -j ACCEPT
 addrule -A INPUT -p TCP --dport 53 -i $NIC_IC -j ACCEPT
 addrule -A INPUT -p UDP --dport 53 -i $NIC_BRIDGE -j ACCEPT
 addrule -A INPUT -p TCP --dport 53 -i $NIC_BRIDGE -j ACCEPT
+addrule -A INPUT -p UDP --dport 53 -i $NIC_ANYCAST -j ACCEPT
+addrule -A INPUT -p TCP --dport 53 -i $NIC_ANYCAST -j ACCEPT
 
 # Allow HTTP from IC and Mesh
 addrule -A INPUT -p UDP --dport 80 -i $NIC_IC -j ACCEPT
 addrule -A INPUT -p TCP --dport 80 -i $NIC_IC -j ACCEPT
 addrule -A INPUT -p UDP --dport 80 -i $NIC_BRIDGE -j ACCEPT
 addrule -A INPUT -p TCP --dport 80 -i $NIC_BRIDGE -j ACCEPT
+addrule -A INPUT -p UDP --dport 80 -i $NIC_ANYCAST -j ACCEPT
+addrule -A INPUT -p TCP --dport 80 -i $NIC_ANYCAST -j ACCEPT
 
 addrule -A INPUT -p TCP --dport 443 -i $NIC_IC -j ACCEPT
 addrule -A INPUT -p TCP --dport 443 -i $NIC_BRIDGE -j ACCEPT
+addrule -A INPUT -p TCP --dport 443 -i $NIC_ANYCAST -j ACCEPT
 
 # Allow INPUT and OUTPUT Bridge Interface
 #TODO: remove this rules, add allow rules for established+related connections, ping, speedtest, 80tcp, 53udp/tcp, router-advertisement-zeug, ntp
 addrule -A INPUT -i $NIC_BRIDGE -j ACCEPT
 addrule -A OUTPUT -o $NIC_BRIDGE -j ACCEPT
+addrule -A INPUT -i $NIC_ANYCAST -j ACCEPT
+addrule -A OUTPUT -o $NIC_ANYCAST -j ACCEPT
 
 #DHCP out to serve our clients
 addrule -A INPUT  -p UDP -i $NIC_BRIDGE --sport 68 --dport 67 -j ACCEPT
@@ -288,6 +307,11 @@ addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j 
 addrule6 -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
 addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
 
+addrule6 -A FORWARD -i $NIC_ANYCAST -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
+addrule6 -A FORWARD -i $NIC_VPN -o $NIC_ANYCAST -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
+addrule6 -A FORWARD -i $NIC_ANYCAST -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
+addrule6 -A FORWARD -i $NIC_IC -o $NIC_ANYCAST -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
+addrule6 -A FORWARD -i $NIC_ANYCAST -o $NIC_ANYCAST -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
 
 ip6tables-save -c > $counterfile
 
