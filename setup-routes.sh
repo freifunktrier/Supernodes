@@ -35,5 +35,5 @@ echo 1 > /proc/sys/net/ipv4/ip_forward
 echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
 
 #enable correct anycast-arp-handling
-sudo sysctl -w net.ipv4.conf.all.arp_filter=1
+sysctl -w net.ipv4.conf.all.arp_filter=1
 
