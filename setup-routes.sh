@@ -15,8 +15,6 @@ ip -6 rule del iif br-fftr table VPN
 #Packets from mesh are routet via VPN, not via main uplink
 ip rule add iif br-fftr table VPN
 ip -6 rule add iif br-fftr table VPN
-ip rule add iif fftr-gw-anycast table VPN
-ip -6 rule add iif fftr-gw-anycast table VPN
 
 #route otherwise unroutable IP-Adresses via VPN and not via main uplink
 ip -6 rule add from 2001:bf7:fc00::/44 table VPN
