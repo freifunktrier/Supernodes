@@ -164,11 +164,13 @@ done
 
 ## INPUT
 
-# TCP/UDP Port 10000/10001/1723 (fastd)
+# TCP/UDP Port 10000/10001/10100/1723 (fastd)
 addrule -A INPUT -p TCP --dport 10000 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 10000 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p TCP --dport 10001 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 10001 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p TCP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 
