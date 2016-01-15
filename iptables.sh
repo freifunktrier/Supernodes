@@ -231,6 +231,9 @@ addrule -A OUTPUT -p UDP -o $NIC_IC --dport 179 -j ACCEPT
 
 #allow 6in4
 addrule -A OUTPUT -p ipv6 -o $NIC_PUBLIC -j ACCEPT
+
+#allow monotone
+addrule -A OUTPUT -p TCP --dport 4691 -j ACCEPT
 #################################
 
 #reject everything that did not match any previous
