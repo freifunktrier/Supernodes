@@ -236,7 +236,7 @@ addrule -A OUTPUT -p ipv6 -o $NIC_PUBLIC -j ACCEPT
 #reject everything that did not match any previous
 addrule -A INPUT -j REJECT
 addrule -A FORWARD -j REJECT
-addrule -A INPUT -j REJECT
+addrule -A OUTPUT -j REJECT
 # Drop the rest (reject is not possible here and there should be no rest anyway)
 addrule -P INPUT DROP
 addrule -P FORWARD DROP
