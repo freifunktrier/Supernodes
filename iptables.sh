@@ -177,6 +177,8 @@ addrule -A INPUT -p UDP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 # TCP/UDP Port 655 (tinc)
 addrule -A INPUT -p TCP --dport 655 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 655 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 656 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 656 -i $NIC_PUBLIC -j ACCEPT
 
 # TCP Port 22 (SSH)
 addrule -A INPUT -p TCP --dport 22 -i $NIC_PUBLIC -j ACCEPT
