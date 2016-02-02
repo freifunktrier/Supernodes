@@ -1,5 +1,9 @@
 #!/bin/sh
 
+#reload sysctl because of https://bugs.launchpad.net/ubuntu/+source/procps/+bug/50093
+#TL;DR: sysctl is loaded incompleatly because it's loaded to early in the boot
+service procps start
+
 if ! grep -q VPN /etc/iproute2/rt_tables; then
 	echo 10 VPN >> /etc/iproute2/rt_tables
 fi
