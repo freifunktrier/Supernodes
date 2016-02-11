@@ -1,0 +1,28 @@
+#!/bin/bash
+/sbin/tc qdisc del dev eth0 root handle 1:0 htb default 0
+/sbin/tc qdisc add dev eth0 root handle 1:0 htb default 0
+
+export TZ='Europe/Berlin' #set correct timezone
+DAYOFWEEK=$(/bin/date +%u) #day of week. Monday = 1#
+HOUROFDAY=$(/bin/date +%H) #hour between 0 and 23
+
+#we have Monday - Friday
+#we have hour >= 8
+ #we have hour <= 18
+
+if [ $DAYOFWEEK -lt 6 \
+     -a $HOUROFDAY -gt 7 \
+     -a $HOUROFDAY -lt 19 \
+   ]; then
+	#give them 1 MBit/s
+	/sbin/tc class add dev eth0 parent 1:0 classid 1:10 htb rate 1mbit ceil 1mbit prio 0
+	echo "Limited to 1 MBit/s"
+else 	#give them 3 MBit/s
+	/sbin/tc class add dev eth0 parent 1:0 classid 1:10 htb rate 3mbit ceil 3mbit prio 0
+	echo "Limited to 3 MBit/s"
+fi
+
+
+/sbin/tc filter add dev eth0 parent 1:0 protocol ip u32 match ip6 dst <insert IPv6-Adress here> flowid 1:10
+
+
