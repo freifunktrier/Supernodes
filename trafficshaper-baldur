@@ -8,11 +8,11 @@ HOUROFDAY=$(/bin/date +%H) #hour between 0 and 23
 
 #we have Monday - Friday
 #we have hour >= 8
- #we have hour <= 18
+#we have hour <= 17 (ends at 18:00)
 
 if [ $DAYOFWEEK -lt 6 \
      -a $HOUROFDAY -gt 7 \
-     -a $HOUROFDAY -lt 19 \
+     -a $HOUROFDAY -lt 18 \
    ]; then
 	#give them 1 MBit/s
 	/sbin/tc class add dev eth0 parent 1:0 classid 1:10 htb rate 1mbit ceil 1mbit prio 0
