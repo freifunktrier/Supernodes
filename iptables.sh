@@ -5,6 +5,10 @@ NIC_BRIDGE=br-fftr
 NIC_IC=icvpn
 ALFRED_JSON=""
 
+if [ -e "/var/lib/Supernodes/configs/$(hostname)/iptables" ]; then
+	. "/var/lib/Supernodes/configs/$(hostname)/iptables"
+fi
+
 if [ ! -f "$ALFRED_JSON" ]; then
 	ALFRED_JSON="/root/alfred-json/src/alfred-json"
 fi
@@ -179,6 +183,8 @@ addrule -A INPUT -p TCP --dport 655 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 655 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p TCP --dport 656 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 656 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 755 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 755 -i $NIC_PUBLIC -j ACCEPT
 
 # TCP Port 22 (SSH)
 addrule -A INPUT -p TCP --dport 22 -i $NIC_PUBLIC -j ACCEPT
