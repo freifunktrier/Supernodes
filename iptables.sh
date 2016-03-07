@@ -4,7 +4,6 @@ NIC_VPN=tun0
 NIC_BRIDGE=br-fftr
 NIC_IC=icvpn
 ALFRED_JSON=""
-
 if [ -e "/var/lib/Supernodes/configs/$(hostname)/iptables" ]; then
 	. "/var/lib/Supernodes/configs/$(hostname)/iptables"
 fi
@@ -16,6 +15,8 @@ fi
 if [ ! -f "$ALFRED_JSON" ]; then
 	ALFRED_JSON="/usr/local/src/alfred-json/build/src/alfred-json"
 fi
+
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 #Thank you http://www.semicomplete.com/blog/geekery/atomic-iptables-changes-and-not-dropping-packets.html
 formatrule() {
