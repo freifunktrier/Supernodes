@@ -67,7 +67,7 @@ COMMIT
 :INPUT DROP [0:0]
 :FORWARD DROP [0:0]
 :OUTPUT DROP [0:0]
-" > $rulefile
+" >> $rulefile
 addrule() {
 	formatrule "$@" >> $rulefile
 }
@@ -105,7 +105,7 @@ COMMIT
 :INPUT ACCEPT [0:0]
 :FORWARD ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
-" > $rulefile6
+" >> $rulefile6
 addrule6() {
 	formatrule "$@" >> $rulefile6
 }
