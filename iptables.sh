@@ -42,8 +42,10 @@ echo "
 " > $rulefile
 #disable conntrack für everything exept 10.172.0.8 - 10.172.0.16
 echo "
--A PREROUTING ! -s 10.172.0.8/29 ! -d 10.172.0.8/29 -j NOTRACK
--A OUTPUT ! -s 10.172.0.8/29 ! -d 10.172.0.8/29 -j NOTRACK
+-A PREROUTING -i icvpn ! -s 10.172.0.8/29 ! -d 10.172.0.8/29 -j NOTRACK
+-A PREROUTING -i br-fftr ! -s 10.172.0.8/29 ! -d 10.172.0.8/29 -j NOTRACK
+-A OUTPUT -o icvpn ! -s 10.172.0.8/29 ! -d 10.172.0.8/29 -j NOTRACK
+-A OUTPUT -o br-fftr ! -s 10.172.0.8/29 ! -d 10.172.0.8/29 -j NOTRACK
 COMMIT
 
 *mangle
@@ -78,8 +80,10 @@ echo "
 " > $rulefile6
 #disable conntrack für everything exept 2001:bf7:fc0f::10/124
 echo "
--A PREROUTING ! -s 2001:bf7:fc0f::10/124 ! -d 2001:bf7:fc0f::10/125 -j NOTRACK
--A OUTPUT ! -s 2001:bf7:fc0f::10/124 ! -d 2001:bf7:fc0f::10/125 -j NOTRACK
+-A PREROUTING -i icvpn ! -s 2001:bf7:fc0f::10/124 ! -d 2001:bf7:fc0f::10/125 -j NOTRACK
+-A PREROUTING -i br-fftr ! -s 2001:bf7:fc0f::10/124 ! -d 2001:bf7:fc0f::10/125 -j NOTRACK
+-A OUTPUT -o icvpn ! -s 2001:bf7:fc0f::10/124 ! -d 2001:bf7:fc0f::10/125 -j NOTRACK
+-A OUTPUT -o br-fftr ! -s 2001:bf7:fc0f::10/124 ! -d 2001:bf7:fc0f::10/125 -j NOTRACK
 COMMIT
 
 *mangle
