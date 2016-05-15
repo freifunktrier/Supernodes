@@ -90,13 +90,8 @@ echo "
 *raw
 :PREROUTING ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
-" > $rulefile6
-#disable conntrack für everything exept 2001:bf7:fc0f::10/124
-echo "
--A PREROUTING -i icvpn ! -s 2001:bf7:fc0f::10/124 ! -d 2001:bf7:fc0f::10/125 -j NOTRACK
--A PREROUTING -i br-fftr ! -s 2001:bf7:fc0f::10/124 ! -d 2001:bf7:fc0f::10/125 -j NOTRACK
--A OUTPUT -o icvpn ! -s 2001:bf7:fc0f::10/124 ! -d 2001:bf7:fc0f::10/125 -j NOTRACK
--A OUTPUT -o br-fftr ! -s 2001:bf7:fc0f::10/124 ! -d 2001:bf7:fc0f::10/125 -j NOTRACK
+-A PREROUTING -j NOTRACK
+-A OUTPUT -j NOTRACK
 COMMIT
 
 *mangle
