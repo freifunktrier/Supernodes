@@ -42,10 +42,23 @@ echo "
 " > $rulefile
 #disable conntrack für everything exept 10.172.0.8 - 10.172.0.16
 echo "
--A PREROUTING -i icvpn ! -s 10.172.0.8/29 ! -d 10.172.0.8/29 -j NOTRACK
--A PREROUTING -i br-fftr ! -s 10.172.0.8/29 ! -d 10.172.0.8/29 -j NOTRACK
--A OUTPUT -o icvpn ! -s 10.172.0.8/29 ! -d 10.172.0.8/29 -j NOTRACK
--A OUTPUT -o br-fftr ! -s 10.172.0.8/29 ! -d 10.172.0.8/29 -j NOTRACK
+:notrack-helper-PREROUTING - [0:0]
+:notrack-helper-OUTPUT - [0:0]
+-A PREROUTING -i icvpn -j notrack-helper-PREROUTING
+-A PREROUTING -i br-fftr -j notrack-helper-PREROUTING
+-A notrack-helper-PREROUTING -s 10.172.0.8/29 -j RETURN
+-A notrack-helper-PREROUTING -d 10.172.0.8/29 -j RETURN
+-A notrack-helper-PREROUTING -s 10.207.0.216/29 -j RETURN
+-A notrack-helper-PREROUTING -d 10.207.0.216/29 -j RETURN
+-A notrack-helper-PREROUTING -j NOTRACK
+
+-A OUTPUT -o icvpn -j notrack-helper-OUTPUT
+-A OUTPUT -o br-fftr -j notrack-helper-OUTPUT
+-A notrack-helper-OUTPUT -s 10.172.0.8/29 -j RETURN
+-A notrack-helper-OUTPUT -d 10.172.0.8/29 -j RETURN
+-A notrack-helper-OUTPUT -s 10.207.0.216/29 -j RETURN
+-A notrack-helper-OUTPUT -d 10.207.0.216/29 -j RETURN
+-A notrack-helper-OUTPUT -j NOTRACK
 COMMIT
 
 *mangle
