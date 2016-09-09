@@ -40,7 +40,7 @@ echo "
 :PREROUTING ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 " > $rulefile
-#disable conntrack für everything exept 10.172.0.8 - 10.172.0.16
+#disable conntrack für everything exept 10.172.0.8 - 10.172.0.15
 echo "
 :notrack-helper-PREROUTING - [0:0]
 :notrack-helper-OUTPUT - [0:0]
