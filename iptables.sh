@@ -322,8 +322,8 @@ fi
 #reject traffic to/from routers
 $ALFRED_JSON -r 158 -z | jq '.[] | select(.supernode.ipv6fw == false) | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' > /tmp/ipv6-whitelist
 echo 2001:bf7:fc0f:0:c66e:1fff:feff:22fe >> /tmp/ipv6-whitelist
-# suggest an other quick and dirty hack to insert Whitlist IPs from the Repo
-wget -q https://github.com/freifunktrier/Supernodes-dynamic/raw/master/iptables-whitelist -O - | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' >> /tmp/ipv6-whitelist
+
+grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' /tmp/git_iptables-whitelist >> /tmp/ipv6-whitelist
 
 for i in $($ALFRED_JSON -r 158 -z | jq '.[] | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' | grep -v -F -f /tmp/ipv6-whitelist); do
 	addrule6 -A INPUT -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
