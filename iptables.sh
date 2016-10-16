@@ -275,6 +275,10 @@ addrule -A OUTPUT -p ipv6 -o $NIC_PUBLIC -j ACCEPT
 
 #allow monotone
 addrule -A OUTPUT -p TCP --dport 4691 -j ACCEPT
+
+#allow GPG-Keyserver for ansible idempotenz
+addrule -A OUTPUT -p TCP --dport 11371 -j ACCEPT
+
 #################################
 
 #reject everything that did not match any previous
