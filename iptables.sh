@@ -50,6 +50,8 @@ echo "
 -A notrack-helper-PREROUTING -d 10.172.0.8/29 -j RETURN
 -A notrack-helper-PREROUTING -s 10.207.0.216/29 -j RETURN
 -A notrack-helper-PREROUTING -d 10.207.0.216/29 -j RETURN
+-A notrack-helper-PREROUTING -s 10.207.0.93/32 -j RETURN
+-A notrack-helper-PREROUTING -d 10.207.0.93/32 -j RETURN
 -A notrack-helper-PREROUTING -j NOTRACK
 
 -A OUTPUT -o icvpn -j notrack-helper-OUTPUT
@@ -58,6 +60,8 @@ echo "
 -A notrack-helper-OUTPUT -d 10.172.0.8/29 -j RETURN
 -A notrack-helper-OUTPUT -s 10.207.0.216/29 -j RETURN
 -A notrack-helper-OUTPUT -d 10.207.0.216/29 -j RETURN
+-A notrack-helper-OUTPUT -s 10.207.0.93/32 -j RETURN
+-A notrack-helper-OUTPUT -d 10.207.0.93/32 -j RETURN
 -A notrack-helper-OUTPUT -j NOTRACK
 COMMIT
 
