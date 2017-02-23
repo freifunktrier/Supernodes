@@ -214,6 +214,8 @@ addrule -A INPUT -p TCP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p TCP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
+# for neso who has fastd also on port 80:
+addrule -A INPUT -p UDP --dport 80 -i $NIC_PUBLIC -j ACCEPT
 
 # TCP/UDP Port 655 (tinc)
 addrule -A INPUT -p TCP --dport 655 -i $NIC_PUBLIC -j ACCEPT
