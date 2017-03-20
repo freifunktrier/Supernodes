@@ -1,0 +1,3 @@
+NIC_PUBLIC=eth0
+NIC_PUBLIC=eth1
+
