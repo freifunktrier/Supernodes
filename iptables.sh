@@ -46,8 +46,8 @@ echo "
 :notrack-helper-OUTPUT - [0:0]
 -A PREROUTING -i icvpn -j notrack-helper-PREROUTING
 -A PREROUTING -i br-fftr -j notrack-helper-PREROUTING
--A notrack-helper-PREROUTING -s 10.172.0.8/29 -j RETURN
--A notrack-helper-PREROUTING -d 10.172.0.8/29 -j RETURN
+-A notrack-helper-PREROUTING -s 10.172.0.0/27 -j RETURN
+-A notrack-helper-PREROUTING -d 10.172.0.0/27 -j RETURN
 -A notrack-helper-PREROUTING -s 10.207.0.216/29 -j RETURN
 -A notrack-helper-PREROUTING -d 10.207.0.216/29 -j RETURN
 -A notrack-helper-PREROUTING -s 10.207.0.93/32 -j RETURN
@@ -56,8 +56,8 @@ echo "
 
 -A OUTPUT -o icvpn -j notrack-helper-OUTPUT
 -A OUTPUT -o br-fftr -j notrack-helper-OUTPUT
--A notrack-helper-OUTPUT -s 10.172.0.8/29 -j RETURN
--A notrack-helper-OUTPUT -d 10.172.0.8/29 -j RETURN
+-A notrack-helper-OUTPUT -s 10.172.0.0/27 -j RETURN
+-A notrack-helper-OUTPUT -d 10.172.0.0/27 -j RETURN
 -A notrack-helper-OUTPUT -s 10.207.0.216/29 -j RETURN
 -A notrack-helper-OUTPUT -d 10.207.0.216/29 -j RETURN
 -A notrack-helper-OUTPUT -s 10.207.0.93/32 -j RETURN
