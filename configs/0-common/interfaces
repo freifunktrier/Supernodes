@@ -1,2 +1,0 @@
-source /etc/network/interfaces.d/*.conf
-source /etc/network/interfaces.d/*.cfg

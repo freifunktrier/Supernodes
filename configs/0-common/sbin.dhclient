@@ -1,4 +1,0 @@
-
-#allow dhclient to read its config from git
-/root/Supernodes/configs/*/dhclient.conf r,
-
