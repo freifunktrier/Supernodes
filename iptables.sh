@@ -40,26 +40,45 @@ echo "
 :PREROUTING ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 " > $rulefile
-#disable conntrack für everything exept 10.172.0.8 - 10.172.0.15
+#disable conntrack für everything exept 10.172.0.8 - 10.172.0.31
 echo "
 :notrack-helper-PREROUTING - [0:0]
 :notrack-helper-OUTPUT - [0:0]
 -A PREROUTING -i icvpn -j notrack-helper-PREROUTING
 -A PREROUTING -i br-fftr -j notrack-helper-PREROUTING
+-A PREROUTING -i br-fftr_01 -j notrack-helper-PREROUTING
+-A PREROUTING -i br-fftr_02 -j notrack-helper-PREROUTING
+-A PREROUTING -i br-fftr_03 -j notrack-helper-PREROUTING
+-A PREROUTING -i br-fftr_04 -j notrack-helper-PREROUTING
+-A PREROUTING -i br-fftr_05 -j notrack-helper-PREROUTING
+
+
 -A notrack-helper-PREROUTING -s 10.172.0.0/27 -j RETURN
 -A notrack-helper-PREROUTING -d 10.172.0.0/27 -j RETURN
 -A notrack-helper-PREROUTING -s 10.207.0.216/29 -j RETURN
 -A notrack-helper-PREROUTING -d 10.207.0.216/29 -j RETURN
+# we use some more IPs for BGP today
+-A notrack-helper-PREROUTING -s 10.207.0.224/29 -j RETURN
+-A notrack-helper-PREROUTING -d 10.207.0.224/29 -j RETURN
 -A notrack-helper-PREROUTING -s 10.207.0.93/32 -j RETURN
 -A notrack-helper-PREROUTING -d 10.207.0.93/32 -j RETURN
 -A notrack-helper-PREROUTING -j NOTRACK
 
 -A OUTPUT -o icvpn -j notrack-helper-OUTPUT
 -A OUTPUT -o br-fftr -j notrack-helper-OUTPUT
+-A OUTPUT -o br-fftr_01 -j notrack-helper-OUTPUT
+-A OUTPUT -o br-fftr_02 -j notrack-helper-OUTPUT
+-A OUTPUT -o br-fftr_03 -j notrack-helper-OUTPUT
+-A OUTPUT -o br-fftr_04 -j notrack-helper-OUTPUT
+-A OUTPUT -o br-fftr_05 -j notrack-helper-OUTPUT
+
 -A notrack-helper-OUTPUT -s 10.172.0.0/27 -j RETURN
 -A notrack-helper-OUTPUT -d 10.172.0.0/27 -j RETURN
 -A notrack-helper-OUTPUT -s 10.207.0.216/29 -j RETURN
 -A notrack-helper-OUTPUT -d 10.207.0.216/29 -j RETURN
+# we use some more IPs for BGP today
+-A notrack-helper-OUTPUT -s 10.207.0.224/29 -j RETURN
+-A notrack-helper-OUTPUT -d 10.207.0.224/29 -j RETURN
 -A notrack-helper-OUTPUT -s 10.207.0.93/32 -j RETURN
 -A notrack-helper-OUTPUT -d 10.207.0.93/32 -j RETURN
 -A notrack-helper-OUTPUT -j NOTRACK
@@ -152,9 +171,9 @@ addrule -A OUTPUT -s 127.0.0.1 -j ACCEPT
 iptables-save -c > $counterfile
 
 echo -n "$(grep "INPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile
-addrule -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000,10001,1723 -m comment --comment "ACC-fastd"
+addrule -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000-10015,1723 -m comment --comment "ACC-fastd"
 echo -n "$(grep "OUTPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile
-addrule -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000,10001,1723 -m comment --comment "ACC-fastd"
+addrule -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000-10015,1723 -m comment --comment "ACC-fastd"
 
 echo -n "$(grep "INPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile
 addrule -A INPUT  -i $NIC_PUBLIC -p UDP --destination-port 655 -m comment --comment "ACC-tincudp"
@@ -205,11 +224,37 @@ done
 
 ## INPUT
 
-# TCP/UDP Port 10000/10001/10100/1723 (fastd)
+# TCP/UDP Port 10000-10015/10100/1723 (fastd)
 addrule -A INPUT -p TCP --dport 10000 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 10000 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p TCP --dport 10001 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 10001 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10002 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10002 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10003 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10003 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10004 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10004 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10005 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10005 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10006 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10006 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10007 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10007 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10009 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10009 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10010 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10010 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10011 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10011 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10012 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10012 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10013 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10013 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10014 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10014 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10015 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10015 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p TCP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p TCP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
