@@ -394,9 +394,9 @@ addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN
 ip6tables-save -c > $counterfile
 
 echo -n "$(grep "INPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000,10001,10002,10003,10004,10005,10006,10007,10008,10009,10010,10011,10012,10013,10014,10015,1723 -m comment --comment "ACC-fastd"
+addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000,10001,1723 -m comment --comment "ACC-fastd"
 echo -n "$(grep "OUTPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000,10001,10002,10003,10004,10005,10006,10007,10008,10009,10010,10011,10012,10013,10014,10015,1723 -m comment --comment "ACC-fastd"
+addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000,10001,1723 -m comment --comment "ACC-fastd"
 
 echo -n "$(grep "INPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
 addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP --destination-port 655 -m comment --comment "ACC-tincudp"
