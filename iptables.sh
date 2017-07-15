@@ -225,36 +225,8 @@ done
 ## INPUT
 
 # TCP/UDP Port 10000-10015/10100/1723 (fastd)
-addrule -A INPUT -p TCP --dport 10000 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10000 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 10001 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10001 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 10002 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10002 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 10003 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10003 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 10004 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10004 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 10005 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10005 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 10006 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10006 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 10007 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10007 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 10009 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10009 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 10010 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10010 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 10011 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10011 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 10012 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10012 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 10013 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10013 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 10014 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10014 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 10015 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10015 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10000:10015 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10000:10015 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p TCP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p TCP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
