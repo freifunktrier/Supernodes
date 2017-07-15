@@ -7,8 +7,7 @@
 #
 
 # What servers should the DHCP relay forward requests to?
-# SERVERS="errai.fftr naos.fftr" # heinz: noch in DNS, eintragen und später ändern in die Berlin-GWs
-SERVERS="errai.fftr"  # naos.fftr spielt mal relay 
+SERVERS="errai.fftr naos.fftr" # heinz: noch in DNS, eintragen und später ändern in die Berlin-GWs
 
 # On what interfaces should the DHCP relay (dhrelay) serve DHCP requests?
 INTERFACES="fftr-mesh-vpn fftr-mesh-vpn_01 fftr-mesh-vpn_02 fftr-mesh-vpn_03 fftr-mesh-vpn_04 fftr-mesh-vpn_05"
