@@ -224,11 +224,13 @@ done
 
 ## INPUT
 
-# TCP/UDP Port 10000-10015/10100/1723 (fastd)
+# TCP/UDP Port 10000-10015/10100-10115/1723 (fastd)
 addrule -A INPUT -p TCP --dport 10000:10015 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 10000:10015 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
+# baldur has different range
+addrule -A INPUT -p TCP --dport 10100:10115 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10100:10115 -i $NIC_PUBLIC -j ACCEPT
+# draco additional fastd
 addrule -A INPUT -p TCP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 # for neso who has fastd also on port 80:
