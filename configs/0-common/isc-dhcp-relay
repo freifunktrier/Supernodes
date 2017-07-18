@@ -10,7 +10,7 @@
 SERVERS="errai.fftr naos.fftr" # heinz: noch in DNS, eintragen und später ändern in die Berlin-GWs
 
 # On what interfaces should the DHCP relay (dhrelay) serve DHCP requests?
-INTERFACES="fftr-mesh-vpn fftr-mesh-vpn_01 fftr-mesh-vpn_02 fftr-mesh-vpn_03 fftr-mesh-vpn_04 fftr-mesh-vpn_05"
+INTERFACES="fvpn fvpn_01 fvpn_02 fvpn_03 fvpn_04 fvpn_05"
 
 # Additional options that are passed to the DHCP relay daemon?
 OPTIONS=""
