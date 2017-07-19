@@ -227,9 +227,9 @@ done
 # TCP/UDP Port 10000-10015/10100-10115/1723 (fastd)
 addrule -A INPUT -p TCP --dport 10000:10015 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 10000:10015 -i $NIC_PUBLIC -j ACCEPT
-# baldur has different range
-addrule -A INPUT -p TCP --dport 10100:10115 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10100:10115 -i $NIC_PUBLIC -j ACCEPT
+# baldur has had a different range for default segment
+addrule -A INPUT -p TCP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
 # draco additional fastd
 addrule -A INPUT -p TCP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
@@ -368,9 +368,9 @@ addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN
 ip6tables-save -c > $counterfile
 
 echo -n "$(grep "INPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000,10001,1723 -m comment --comment "ACC-fastd"
+addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000:10015,1723 -m comment --comment "ACC-fastd"
 echo -n "$(grep "OUTPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000,10001,1723 -m comment --comment "ACC-fastd"
+addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000:10015,1723 -m comment --comment "ACC-fastd"
 
 echo -n "$(grep "INPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
 addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP --destination-port 655 -m comment --comment "ACC-tincudp"
