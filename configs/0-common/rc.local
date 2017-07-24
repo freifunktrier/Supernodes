@@ -14,7 +14,7 @@
 #initialise firewall
 /var/lib/Supernodes/configs/0-common/iptables.sh
 #intialise routing
-/var/lib/Supernodesconfigs/0-common/setup-routes.sh
+/var/lib/Supernodes/configs/0-common/setup-routes.sh
 #initialise batman
 ifup bat0
 
