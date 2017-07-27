@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# we don't need this skript anymore in our net
+exit 0
+# can be deleted if system works
+
+
 #reload sysctl because of https://bugs.launchpad.net/ubuntu/+source/procps/+bug/50093
 #TL;DR: sysctl is loaded incompleatly because it's loaded to early in the boot
 service procps start
