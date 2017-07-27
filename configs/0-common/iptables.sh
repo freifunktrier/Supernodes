@@ -1,7 +1,7 @@
 #!/bin/bash
 NIC_PUBLIC=eth0
 NIC_VPN=tun0
-NIC_BRIDGE=br-fftr
+NIC_BRIDGE=br-fftr+
 NIC_IC=icvpn
 ALFRED_JSON=""
 if [ -e "/var/lib/Supernodes/configs/$(hostname)/iptables" ]; then
