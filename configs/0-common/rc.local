@@ -15,8 +15,9 @@
 /var/lib/Supernodes/configs/0-common/iptables.sh
 #intialise routing
 /var/lib/Supernodes/configs/0-common/setup-routes.sh
-#initialise batman
-ifup bat0
+
+#initialise batman ... not needed. Is done by fastd 
+#ifup bat0
 
 
 exit 0
