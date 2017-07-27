@@ -337,6 +337,10 @@ for i in $($ALFRED_JSON -r 158 -z | jq '.[] | {network} | .[] | {addresses} | .[
 	addrule6 -A OUTPUT -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
 	addrule6 -A FORWARD -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
 	addrule6 -A FORWARD -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
+	addrule6 -A INPUT -i $NIC_PUBLIC -d $i -j REJECT --reject-with adm-prohibited
+	addrule6 -A OUTPUT -o $NIC_PUBLIC -s $i -j REJECT --reject-with adm-prohibited
+	addrule6 -A FORWARD -i $NIC_PUBLIC -d $i -j REJECT --reject-with adm-prohibited
+	addrule6 -A FORWARD -o $NIC_PUBLIC -s $i -j REJECT --reject-with adm-prohibited
 done
 
 addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
@@ -344,6 +348,8 @@ addrule6 -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j
 addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
 addrule6 -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
 addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
+addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_PUBLIC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
+addrule6 -A FORWARD -i $NIC_PUBLIC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
 
 
 ip6tables-save -c > $counterfile
