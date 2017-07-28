@@ -1,5 +1,5 @@
 #!/bin/bash
-NIC_PUBLIC=ENS§
+NIC_PUBLIC=ens3
 NIC_VPN=tun0
 NIC_BRIDGE=br-fftr+
 NIC_IC=icvpn
