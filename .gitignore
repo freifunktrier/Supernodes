@@ -1,3 +1,4 @@
 *.bak
 configs/0-common/fastd/gw-errai_old
 configs/0-common/fastd/gw-naos_old
+.~lock.GW-Datentabelle.ods#
