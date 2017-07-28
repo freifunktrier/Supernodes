@@ -191,7 +191,6 @@ rm $counterfile
 
 
 # Forward our Clients to Internet via NAT
-addrule -t nat -A POSTROUTING -o $NIC_PUBLIC -j MASQUERADE
 addrule -A FORWARD -i $NIC_BRIDGE  -o $NIC_PUBLIC -j ACCEPT
 
 
