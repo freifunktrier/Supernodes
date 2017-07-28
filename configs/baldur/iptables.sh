@@ -41,6 +41,8 @@ echo "
 :OUTPUT ACCEPT [0:0]
 " > $rulefile
 #disable conntrack für everything exept 10.172.0.8 - 10.172.0.31
+# ... except: 10.172.0.0/27
+##  MUSS GEÄNDERT WERDEN WENN WIR LOKAL AUSLEITEN UND NAT MACHEN !! ... also except 10.172.0.0/16 
 echo "
 :notrack-helper-PREROUTING - [0:0]
 :notrack-helper-OUTPUT - [0:0]
@@ -53,8 +55,8 @@ echo "
 -A PREROUTING -i br-fftr_05 -j notrack-helper-PREROUTING
 
 
--A notrack-helper-PREROUTING -s 10.172.0.0/27 -j RETURN
--A notrack-helper-PREROUTING -d 10.172.0.0/27 -j RETURN
+-A notrack-helper-PREROUTING -s 10.172.0.0/16 -j RETURN
+-A notrack-helper-PREROUTING -d 10.172.0.0/16 -j RETURN
 -A notrack-helper-PREROUTING -s 10.207.0.216/29 -j RETURN
 -A notrack-helper-PREROUTING -d 10.207.0.216/29 -j RETURN
 # we use some more IPs for BGP today
@@ -72,8 +74,8 @@ echo "
 -A OUTPUT -o br-fftr_04 -j notrack-helper-OUTPUT
 -A OUTPUT -o br-fftr_05 -j notrack-helper-OUTPUT
 
--A notrack-helper-OUTPUT -s 10.172.0.0/27 -j RETURN
--A notrack-helper-OUTPUT -d 10.172.0.0/27 -j RETURN
+-A notrack-helper-OUTPUT -s 10.172.0.0/16 -j RETURN
+-A notrack-helper-OUTPUT -d 10.172.0.0/16 -j RETURN
 -A notrack-helper-OUTPUT -s 10.207.0.216/29 -j RETURN
 -A notrack-helper-OUTPUT -d 10.207.0.216/29 -j RETURN
 # we use some more IPs for BGP today
@@ -187,6 +189,12 @@ addrule -A OUTPUT -o $NIC_PUBLIC -p TCP --source-port      655 -m comment --comm
 
 rm $counterfile
 
+
+# Forward our Clients to Internet via NAT
+addrule -t nat -A POSTROUTING -o $NIC_PUBLIC -j MASQUERADE
+addrule -A FORWARD -i $NIC_BRIDGE  -o $NIC_PUBLIC -j ACCEPT
+
+
 # Established, Related
 addrule -A INPUT -p ALL -i $NIC_PUBLIC -m state --state ESTABLISHED,RELATED -j ACCEPT
 addrule -A OUTPUT -p ALL -o $NIC_PUBLIC -m state --state ESTABLISHED,RELATED -j ACCEPT
@@ -227,6 +235,7 @@ done
 # TCP/UDP Port 10000-10015/10100-10115/1723 (fastd)
 addrule -A INPUT -p TCP --dport 10000:10015 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 10000:10015 -i $NIC_PUBLIC -j ACCEPT
+
 # baldur has had a different range for default segment
 addrule -A INPUT -p TCP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
@@ -241,6 +250,8 @@ addrule -A INPUT -p TCP --dport 655 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 655 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p TCP --dport 656 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 656 -i $NIC_PUBLIC -j ACCEPT
+
+# not in use anymore iirc
 addrule -A INPUT -p TCP --dport 755 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 755 -i $NIC_PUBLIC -j ACCEPT
 
