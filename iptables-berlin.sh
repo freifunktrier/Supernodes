@@ -92,6 +92,7 @@ COMMIT
 :INPUT ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
+-A POSTROUTING -o $NIC_PUBLIC -j MASQUERADE
 COMMIT
 
 *filter
@@ -182,7 +183,6 @@ addrule -A FORWARD -i $NIC_IC -o $NIC_PUBLIC -j ACCEPT
 addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
 addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -j ACCEPT
 
-addrule -t nat -A POSTROUTING -o $NIC_PUBLIC -j MASQUERADE #enable NAT
 # Usefull ICMP-Stuff
 for i in destination-unreachable echo-reply echo-request time-exceeded; do
 	addrule -A INPUT -p ICMP --icmp-type $i -j ACCEPT
