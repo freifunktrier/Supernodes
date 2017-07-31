@@ -206,7 +206,7 @@ addrule -A INPUT -p ALL -i $NIC_IC -m state --state ESTABLISHED,RELATED -j ACCEP
 addrule -A OUTPUT -p ALL -o $NIC_IC -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # Allow mesh --> VPN
-# Alternativ make NAT on eth0 and lead traffic into the Internet
+# Alternativ make NAT on eth0/ens3 and lead traffic into the Internet
 #addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
 #addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -j ACCEPT
 addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_PUBLIC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
@@ -214,7 +214,7 @@ addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_PUBLIC -j ACCEPT
 # Allow existing connections to find their way back
 #addrule -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
 #addrule -A FORWARD -i $NIC_VPN -p ALL -o $NIC_BRIDGE -m state --state ESTABLISHED,RELATED -j ACCEPT
-# We send traffic via NAT at eth0
+# We send traffic via NAT at eth0/ens3
 addrule -A FORWARD -i $NIC_PUBLIC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
 addrule -A FORWARD -i $NIC_PUBLIC -p ALL -o $NIC_BRIDGE -m state --state ESTABLISHED,RELATED -j ACCEPT
 
