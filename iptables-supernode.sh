@@ -178,22 +178,6 @@ addrule -A OUTPUT -p ALL -o $NIC_VPN -m state --state ESTABLISHED,RELATED -j ACC
 addrule -A INPUT -p ALL -i $NIC_IC -m state --state ESTABLISHED,RELATED -j ACCEPT
 addrule -A OUTPUT -p ALL -o $NIC_IC -m state --state ESTABLISHED,RELATED -j ACCEPT
 
-# Allow mesh --> VPN
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -j ACCEPT
-# Allow existing connections to find their way back
-addrule -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_VPN -p ALL -o $NIC_BRIDGE -m state --state ESTABLISHED,RELATED -j ACCEPT
-
-# Allow mesh <--> IC
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -j ACCEPT
-addrule -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -j ACCEPT
-
-# Allow mesh <--> mesh
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -j ACCEPT
 
 # Usefull ICMP-Stuff
 for i in destination-unreachable echo-reply echo-request time-exceeded; do
@@ -330,27 +314,7 @@ fi
 #addrule6 -t mangle -X
 
 #reject traffic to/from routers
-$ALFRED_JSON -r 158 -z | jq '.[] | select(.supernode.ipv6fw == false) | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' > /tmp/ipv6-whitelist
-grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' /var/lib/Supernodes-dynamic/iptables-whitelist >> /tmp/ipv6-whitelist
-for i in $($ALFRED_JSON -r 158 -z | jq '.[] | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' | grep -v -F -f /tmp/ipv6-whitelist); do
-	addrule6 -A INPUT -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A OUTPUT -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A FORWARD -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A FORWARD -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A INPUT -i $NIC_PUBLIC -d $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A OUTPUT -o $NIC_PUBLIC -s $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A FORWARD -i $NIC_PUBLIC -d $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A FORWARD -o $NIC_PUBLIC -s $i -j REJECT --reject-with adm-prohibited
-done
-
-addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_PUBLIC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_PUBLIC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-
+addrule6 -A FORWARD -j REJECT --reject-with adm-prohibited
 
 ip6tables-save -c > $counterfile
 
