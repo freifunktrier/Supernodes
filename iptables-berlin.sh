@@ -59,6 +59,7 @@ COMMIT
 :INPUT ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
+-A POSTROUTING -o $NIC_PUBLIC -j MASQUERADE
 COMMIT
 
 *filter
@@ -92,7 +93,6 @@ COMMIT
 :INPUT ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
--A POSTROUTING -o $NIC_PUBLIC -j MASQUERADE
 COMMIT
 
 *filter
@@ -174,10 +174,10 @@ addrule -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j T
 addrule -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -j ACCEPT
 
 # Allow mesh <--> public
-addrule -A FORWARD -i $NIC_PUBLIC -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_PUBLIC -o $NIC_IC -j ACCEPT
-addrule -A FORWARD -i $NIC_IC -o $NIC_PUBLIC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_IC -o $NIC_PUBLIC -j ACCEPT
+addrule -A FORWARD -i $NIC_PUBLIC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
+addrule -A FORWARD -i $NIC_PUBLIC -o $NIC_BRIDGE -j ACCEPT
+addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_PUBLIC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
+addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_PUBLIC -j ACCEPT
 
 # Allow mesh <--> mesh
 addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
