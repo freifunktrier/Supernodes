@@ -40,45 +40,26 @@ echo "
 :PREROUTING ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 " > $rulefile
-#disable conntrack für everything exept 10.172.0.8 - 10.172.0.31
+#disable conntrack für everything exept 10.172.0.8 - 10.172.0.15
 echo "
 :notrack-helper-PREROUTING - [0:0]
 :notrack-helper-OUTPUT - [0:0]
 -A PREROUTING -i icvpn -j notrack-helper-PREROUTING
 -A PREROUTING -i br-fftr -j notrack-helper-PREROUTING
--A PREROUTING -i br-fftr_01 -j notrack-helper-PREROUTING
--A PREROUTING -i br-fftr_02 -j notrack-helper-PREROUTING
--A PREROUTING -i br-fftr_03 -j notrack-helper-PREROUTING
--A PREROUTING -i br-fftr_04 -j notrack-helper-PREROUTING
--A PREROUTING -i br-fftr_05 -j notrack-helper-PREROUTING
-
-
 -A notrack-helper-PREROUTING -s 10.172.0.0/27 -j RETURN
 -A notrack-helper-PREROUTING -d 10.172.0.0/27 -j RETURN
 -A notrack-helper-PREROUTING -s 10.207.0.216/29 -j RETURN
 -A notrack-helper-PREROUTING -d 10.207.0.216/29 -j RETURN
-# we use some more IPs for BGP today
--A notrack-helper-PREROUTING -s 10.207.0.224/29 -j RETURN
--A notrack-helper-PREROUTING -d 10.207.0.224/29 -j RETURN
 -A notrack-helper-PREROUTING -s 10.207.0.93/32 -j RETURN
 -A notrack-helper-PREROUTING -d 10.207.0.93/32 -j RETURN
 -A notrack-helper-PREROUTING -j NOTRACK
 
 -A OUTPUT -o icvpn -j notrack-helper-OUTPUT
 -A OUTPUT -o br-fftr -j notrack-helper-OUTPUT
--A OUTPUT -o br-fftr_01 -j notrack-helper-OUTPUT
--A OUTPUT -o br-fftr_02 -j notrack-helper-OUTPUT
--A OUTPUT -o br-fftr_03 -j notrack-helper-OUTPUT
--A OUTPUT -o br-fftr_04 -j notrack-helper-OUTPUT
--A OUTPUT -o br-fftr_05 -j notrack-helper-OUTPUT
-
 -A notrack-helper-OUTPUT -s 10.172.0.0/27 -j RETURN
 -A notrack-helper-OUTPUT -d 10.172.0.0/27 -j RETURN
 -A notrack-helper-OUTPUT -s 10.207.0.216/29 -j RETURN
 -A notrack-helper-OUTPUT -d 10.207.0.216/29 -j RETURN
-# we use some more IPs for BGP today
--A notrack-helper-OUTPUT -s 10.207.0.224/29 -j RETURN
--A notrack-helper-OUTPUT -d 10.207.0.224/29 -j RETURN
 -A notrack-helper-OUTPUT -s 10.207.0.93/32 -j RETURN
 -A notrack-helper-OUTPUT -d 10.207.0.93/32 -j RETURN
 -A notrack-helper-OUTPUT -j NOTRACK
@@ -197,22 +178,6 @@ addrule -A OUTPUT -p ALL -o $NIC_VPN -m state --state ESTABLISHED,RELATED -j ACC
 addrule -A INPUT -p ALL -i $NIC_IC -m state --state ESTABLISHED,RELATED -j ACCEPT
 addrule -A OUTPUT -p ALL -o $NIC_IC -m state --state ESTABLISHED,RELATED -j ACCEPT
 
-# Allow mesh --> VPN
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -j ACCEPT
-# Allow existing connections to find their way back
-addrule -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_VPN -p ALL -o $NIC_BRIDGE -m state --state ESTABLISHED,RELATED -j ACCEPT
-
-# Allow mesh <--> IC
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -j ACCEPT
-addrule -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -j ACCEPT
-
-# Allow mesh <--> mesh
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -j ACCEPT
 
 # Usefull ICMP-Stuff
 for i in destination-unreachable echo-reply echo-request time-exceeded; do
@@ -224,25 +189,26 @@ done
 
 ## INPUT
 
-# TCP/UDP Port 10000-10015/10100-10115/1723 (fastd)
+# TCP/UDP Port 10000:10015/10100/1723 (fastd)
 addrule -A INPUT -p TCP --dport 10000:10015 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 10000:10015 -i $NIC_PUBLIC -j ACCEPT
-# baldur has had a different range for default segment
-addrule -A INPUT -p TCP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
-# draco additional fastd
+
+# For Baldur has other ports announced in gluon
+#addrule -A INPUT -p TCP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
+#addrule -A INPUT -p UDP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
+
 addrule -A INPUT -p TCP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 # for neso who has fastd also on port 80:
 addrule -A INPUT -p UDP --dport 80 -i $NIC_PUBLIC -j ACCEPT
 
-# TCP/UDP Port 655 (tinc)
-addrule -A INPUT -p TCP --dport 655 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 655 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 656 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 656 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 755 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 755 -i $NIC_PUBLIC -j ACCEPT
+# TCP/UDP Port 655 (tinc)   not-in-use anymore
+#addrule -A INPUT -p TCP --dport 655 -i $NIC_PUBLIC -j ACCEPT
+#addrule -A INPUT -p UDP --dport 655 -i $NIC_PUBLIC -j ACCEPT
+#addrule -A INPUT -p TCP --dport 656 -i $NIC_PUBLIC -j ACCEPT
+#addrule -A INPUT -p UDP --dport 656 -i $NIC_PUBLIC -j ACCEPT
+#addrule -A INPUT -p TCP --dport 755 -i $NIC_PUBLIC -j ACCEPT
+#addrule -A INPUT -p UDP --dport 755 -i $NIC_PUBLIC -j ACCEPT
 
 # TCP Port 22 (SSH)
 addrule -A INPUT -p TCP --dport 22 -i $NIC_PUBLIC -j ACCEPT
@@ -349,27 +315,7 @@ fi
 #addrule6 -t mangle -X
 
 #reject traffic to/from routers
-$ALFRED_JSON -r 158 -z | jq '.[] | select(.supernode.ipv6fw == false) | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' > /tmp/ipv6-whitelist
-grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' /var/lib/Supernodes-dynamic/iptables-whitelist >> /tmp/ipv6-whitelist
-for i in $($ALFRED_JSON -r 158 -z | jq '.[] | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' | grep -v -F -f /tmp/ipv6-whitelist); do
-	addrule6 -A INPUT -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A OUTPUT -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A FORWARD -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A FORWARD -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A INPUT -i $NIC_PUBLIC -d $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A OUTPUT -o $NIC_PUBLIC -s $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A FORWARD -i $NIC_PUBLIC -d $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A FORWARD -o $NIC_PUBLIC -s $i -j REJECT --reject-with adm-prohibited
-done
-
-addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_PUBLIC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_PUBLIC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-
+addrule6 -A FORWARD -j REJECT --reject-with adm-prohibited
 
 ip6tables-save -c > $counterfile
 

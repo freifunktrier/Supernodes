@@ -1,5 +1,5 @@
 #!/bin/bash
-NIC_PUBLIC=ens3
+NIC_PUBLIC=eth0
 NIC_VPN=tun0
 NIC_BRIDGE=br-fftr+
 NIC_IC=icvpn
@@ -40,50 +40,10 @@ echo "
 :PREROUTING ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 " > $rulefile
-#disable conntrack für everything exept 10.172.0.8 - 10.172.0.31
-# ... except: 10.172.0.0/27
-##  MUSS GEÄNDERT WERDEN WENN WIR LOKAL AUSLEITEN UND NAT MACHEN !! ... also except 10.172.0.0/16 
+
 echo "
 :notrack-helper-PREROUTING - [0:0]
 :notrack-helper-OUTPUT - [0:0]
--A PREROUTING -i icvpn -j notrack-helper-PREROUTING
--A PREROUTING -i br-fftr -j notrack-helper-PREROUTING
--A PREROUTING -i br-fftr_01 -j notrack-helper-PREROUTING
--A PREROUTING -i br-fftr_02 -j notrack-helper-PREROUTING
--A PREROUTING -i br-fftr_03 -j notrack-helper-PREROUTING
--A PREROUTING -i br-fftr_04 -j notrack-helper-PREROUTING
--A PREROUTING -i br-fftr_05 -j notrack-helper-PREROUTING
-
-
--A notrack-helper-PREROUTING -s 10.172.0.0/16 -j RETURN
--A notrack-helper-PREROUTING -d 10.172.0.0/16 -j RETURN
--A notrack-helper-PREROUTING -s 10.207.0.216/29 -j RETURN
--A notrack-helper-PREROUTING -d 10.207.0.216/29 -j RETURN
-# we use some more IPs for BGP today
--A notrack-helper-PREROUTING -s 10.207.0.224/29 -j RETURN
--A notrack-helper-PREROUTING -d 10.207.0.224/29 -j RETURN
--A notrack-helper-PREROUTING -s 10.207.0.93/32 -j RETURN
--A notrack-helper-PREROUTING -d 10.207.0.93/32 -j RETURN
--A notrack-helper-PREROUTING -j NOTRACK
-
--A OUTPUT -o icvpn -j notrack-helper-OUTPUT
--A OUTPUT -o br-fftr -j notrack-helper-OUTPUT
--A OUTPUT -o br-fftr_01 -j notrack-helper-OUTPUT
--A OUTPUT -o br-fftr_02 -j notrack-helper-OUTPUT
--A OUTPUT -o br-fftr_03 -j notrack-helper-OUTPUT
--A OUTPUT -o br-fftr_04 -j notrack-helper-OUTPUT
--A OUTPUT -o br-fftr_05 -j notrack-helper-OUTPUT
-
--A notrack-helper-OUTPUT -s 10.172.0.0/16 -j RETURN
--A notrack-helper-OUTPUT -d 10.172.0.0/16 -j RETURN
--A notrack-helper-OUTPUT -s 10.207.0.216/29 -j RETURN
--A notrack-helper-OUTPUT -d 10.207.0.216/29 -j RETURN
-# we use some more IPs for BGP today
--A notrack-helper-OUTPUT -s 10.207.0.224/29 -j RETURN
--A notrack-helper-OUTPUT -d 10.207.0.224/29 -j RETURN
--A notrack-helper-OUTPUT -s 10.207.0.93/32 -j RETURN
--A notrack-helper-OUTPUT -d 10.207.0.93/32 -j RETURN
--A notrack-helper-OUTPUT -j NOTRACK
 COMMIT
 
 *mangle
@@ -99,7 +59,7 @@ COMMIT
 :INPUT ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
--A POSTROUTING -o ens3 -j MASQUERADE
+-A POSTROUTING -o $NIC_PUBLIC -j MASQUERADE
 COMMIT
 
 *filter
@@ -190,11 +150,6 @@ addrule -A OUTPUT -o $NIC_PUBLIC -p TCP --source-port      655 -m comment --comm
 
 rm $counterfile
 
-
-# Forward our Clients to Internet via NAT
-addrule -A FORWARD -i $NIC_BRIDGE  -o $NIC_PUBLIC -j ACCEPT
-
-
 # Established, Related
 addrule -A INPUT -p ALL -i $NIC_PUBLIC -m state --state ESTABLISHED,RELATED -j ACCEPT
 addrule -A OUTPUT -p ALL -o $NIC_PUBLIC -m state --state ESTABLISHED,RELATED -j ACCEPT
@@ -206,25 +161,23 @@ addrule -A INPUT -p ALL -i $NIC_IC -m state --state ESTABLISHED,RELATED -j ACCEP
 addrule -A OUTPUT -p ALL -o $NIC_IC -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # Allow mesh --> VPN
-# Alternativ make NAT on eth0/ens3 and lead traffic into the Internet
-#addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-#addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -j ACCEPT
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_PUBLIC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_PUBLIC -j ACCEPT
+addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
+addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -j ACCEPT
 # Allow existing connections to find their way back
-#addrule -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-#addrule -A FORWARD -i $NIC_VPN -p ALL -o $NIC_BRIDGE -m state --state ESTABLISHED,RELATED -j ACCEPT
-# We send traffic via NAT at eth0/ens3
-addrule -A FORWARD -i $NIC_PUBLIC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_PUBLIC -p ALL -o $NIC_BRIDGE -m state --state ESTABLISHED,RELATED -j ACCEPT
-
-
+addrule -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
+addrule -A FORWARD -i $NIC_VPN -p ALL -o $NIC_BRIDGE -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # Allow mesh <--> IC
 addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
 addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -j ACCEPT
 addrule -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
 addrule -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -j ACCEPT
+
+# Allow mesh <--> public
+addrule -A FORWARD -i $NIC_PUBLIC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
+addrule -A FORWARD -i $NIC_PUBLIC -o $NIC_BRIDGE -j ACCEPT
+addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_PUBLIC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
+addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_PUBLIC -j ACCEPT
 
 # Allow mesh <--> mesh
 addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
@@ -240,28 +193,30 @@ done
 
 ## INPUT
 
-# TCP/UDP Port 10000-10015/10100-10115/1723 (fastd)
+# TCP/UDP Port 10000 to 10015 / 10100 / 1723 (fastd)
 addrule -A INPUT -p TCP --dport 10000:10015 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 10000:10015 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10001:10015 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10001:10015 -i $NIC_PUBLIC -j ACCEPT
 
-# baldur has had a different range for default segment
+# Baldur has had an other port announced in gluon
 addrule -A INPUT -p TCP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
-# draco additional fastd
 addrule -A INPUT -p TCP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 # for neso who has fastd also on port 80:
 addrule -A INPUT -p UDP --dport 80 -i $NIC_PUBLIC -j ACCEPT
 
-# TCP/UDP Port 655 (tinc)
+# TCP/UDP Port 655 (tinc) glubit
 addrule -A INPUT -p TCP --dport 655 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 655 -i $NIC_PUBLIC -j ACCEPT
+# TCP/UDP Port 655 (tinc) baldur 
 addrule -A INPUT -p TCP --dport 656 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 656 -i $NIC_PUBLIC -j ACCEPT
 
-# not in use anymore iirc
-addrule -A INPUT -p TCP --dport 755 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 755 -i $NIC_PUBLIC -j ACCEPT
+# not-in-use anymore
+#addrule -A INPUT -p TCP --dport 755 -i $NIC_PUBLIC -j ACCEPT
+#addrule -A INPUT -p UDP --dport 755 -i $NIC_PUBLIC -j ACCEPT
 
 # TCP Port 22 (SSH)
 addrule -A INPUT -p TCP --dport 22 -i $NIC_PUBLIC -j ACCEPT
