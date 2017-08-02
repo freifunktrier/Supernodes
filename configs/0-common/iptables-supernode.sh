@@ -1,7 +1,7 @@
 #!/bin/bash
 NIC_PUBLIC=eth0
 NIC_VPN=tun0
-NIC_BRIDGE=br-fftr+
+NIC_BRIDGE=br-fftr
 NIC_IC=icvpn
 ALFRED_JSON=""
 if [ -e "/var/lib/Supernodes/configs/$(hostname)/iptables" ]; then
@@ -152,9 +152,9 @@ addrule -A OUTPUT -s 127.0.0.1 -j ACCEPT
 iptables-save -c > $counterfile
 
 echo -n "$(grep "INPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile
-addrule -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000:10015,1723 -m comment --comment "ACC-fastd"
+addrule -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000,10001,1723 -m comment --comment "ACC-fastd"
 echo -n "$(grep "OUTPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile
-addrule -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000:10015,1723 -m comment --comment "ACC-fastd"
+addrule -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000,10001,1723 -m comment --comment "ACC-fastd"
 
 echo -n "$(grep "INPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile
 addrule -A INPUT  -i $NIC_PUBLIC -p UDP --destination-port 655 -m comment --comment "ACC-tincudp"
@@ -189,26 +189,25 @@ done
 
 ## INPUT
 
-# TCP/UDP Port 10000:10015/10100/1723 (fastd)
-addrule -A INPUT -p TCP --dport 10000:10015 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10000:10015 -i $NIC_PUBLIC -j ACCEPT
-
-# For Baldur has other ports announced in gluon
-#addrule -A INPUT -p TCP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
-#addrule -A INPUT -p UDP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
-
+# TCP/UDP Port 10000/10001/10100/1723 (fastd)
+addrule -A INPUT -p TCP --dport 10000 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10000 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10001 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10001 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p TCP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 # for neso who has fastd also on port 80:
 addrule -A INPUT -p UDP --dport 80 -i $NIC_PUBLIC -j ACCEPT
 
-# TCP/UDP Port 655 (tinc)   not-in-use anymore
-#addrule -A INPUT -p TCP --dport 655 -i $NIC_PUBLIC -j ACCEPT
-#addrule -A INPUT -p UDP --dport 655 -i $NIC_PUBLIC -j ACCEPT
-#addrule -A INPUT -p TCP --dport 656 -i $NIC_PUBLIC -j ACCEPT
-#addrule -A INPUT -p UDP --dport 656 -i $NIC_PUBLIC -j ACCEPT
-#addrule -A INPUT -p TCP --dport 755 -i $NIC_PUBLIC -j ACCEPT
-#addrule -A INPUT -p UDP --dport 755 -i $NIC_PUBLIC -j ACCEPT
+# TCP/UDP Port 655 (tinc)
+addrule -A INPUT -p TCP --dport 655 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 655 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 656 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 656 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 755 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 755 -i $NIC_PUBLIC -j ACCEPT
 
 # TCP Port 22 (SSH)
 addrule -A INPUT -p TCP --dport 22 -i $NIC_PUBLIC -j ACCEPT
@@ -320,9 +319,9 @@ addrule6 -A FORWARD -j REJECT --reject-with adm-prohibited
 ip6tables-save -c > $counterfile
 
 echo -n "$(grep "INPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000:10015,1723 -m comment --comment "ACC-fastd"
+addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000,10001,1723 -m comment --comment "ACC-fastd"
 echo -n "$(grep "OUTPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000:10015,1723 -m comment --comment "ACC-fastd"
+addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000,10001,1723 -m comment --comment "ACC-fastd"
 
 echo -n "$(grep "INPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
 addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP --destination-port 655 -m comment --comment "ACC-tincudp"

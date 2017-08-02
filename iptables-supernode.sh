@@ -1,5 +1,3 @@
-
-tackin@baldur:/var/lib/Supernodes$ cat iptables-supernode.sh
 #!/bin/bash
 NIC_PUBLIC=eth0
 NIC_VPN=tun0
@@ -7,15 +5,15 @@ NIC_BRIDGE=br-fftr
 NIC_IC=icvpn
 ALFRED_JSON=""
 if [ -e "/var/lib/Supernodes/configs/$(hostname)/iptables" ]; then
-        . "/var/lib/Supernodes/configs/$(hostname)/iptables"
+	. "/var/lib/Supernodes/configs/$(hostname)/iptables"
 fi
 
 if [ ! -f "$ALFRED_JSON" ]; then
-        ALFRED_JSON="/root/alfred-json/src/alfred-json"
+	ALFRED_JSON="/root/alfred-json/src/alfred-json"
 fi
 
 if [ ! -f "$ALFRED_JSON" ]; then
-        ALFRED_JSON="/usr/local/src/alfred-json/build/src/alfred-json"
+	ALFRED_JSON="/usr/local/src/alfred-json/build/src/alfred-json"
 fi
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -88,7 +86,7 @@ COMMIT
 :OUTPUT DROP [0:0]
 " >> $rulefile
 addrule() {
-        formatrule "$@" >> $rulefile
+	formatrule "$@" >> $rulefile
 }
 
 rulefile6="$(mktemp)"
@@ -121,7 +119,7 @@ COMMIT
 :OUTPUT ACCEPT [0:0]
 " >> $rulefile6
 addrule6() {
-        formatrule "$@" >> $rulefile6
+	formatrule "$@" >> $rulefile6
 }
 
 
@@ -183,8 +181,8 @@ addrule -A OUTPUT -p ALL -o $NIC_IC -m state --state ESTABLISHED,RELATED -j ACCE
 
 # Usefull ICMP-Stuff
 for i in destination-unreachable echo-reply echo-request time-exceeded; do
-        addrule -A INPUT -p ICMP --icmp-type $i -j ACCEPT
-        addrule -A OUTPUT -p ICMP --icmp-type $i -j ACCEPT
+	addrule -A INPUT -p ICMP --icmp-type $i -j ACCEPT
+	addrule -A OUTPUT -p ICMP --icmp-type $i -j ACCEPT
 done
 
 #################################
