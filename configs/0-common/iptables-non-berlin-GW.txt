@@ -1,19 +1,21 @@
+
+tackin@baldur:/var/lib/Supernodes$ cat iptables-supernode.sh
 #!/bin/bash
 NIC_PUBLIC=eth0
 NIC_VPN=tun0
-NIC_BRIDGE=br-fftr+
+NIC_BRIDGE=br-fftr
 NIC_IC=icvpn
 ALFRED_JSON=""
 if [ -e "/var/lib/Supernodes/configs/$(hostname)/iptables" ]; then
-	. "/var/lib/Supernodes/configs/$(hostname)/iptables"
+        . "/var/lib/Supernodes/configs/$(hostname)/iptables"
 fi
 
 if [ ! -f "$ALFRED_JSON" ]; then
-	ALFRED_JSON="/root/alfred-json/src/alfred-json"
+        ALFRED_JSON="/root/alfred-json/src/alfred-json"
 fi
 
 if [ ! -f "$ALFRED_JSON" ]; then
-	ALFRED_JSON="/usr/local/src/alfred-json/build/src/alfred-json"
+        ALFRED_JSON="/usr/local/src/alfred-json/build/src/alfred-json"
 fi
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -40,10 +42,29 @@ echo "
 :PREROUTING ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 " > $rulefile
-
+#disable conntrack für everything exept 10.172.0.8 - 10.172.0.15
 echo "
 :notrack-helper-PREROUTING - [0:0]
 :notrack-helper-OUTPUT - [0:0]
+-A PREROUTING -i icvpn -j notrack-helper-PREROUTING
+-A PREROUTING -i br-fftr -j notrack-helper-PREROUTING
+-A notrack-helper-PREROUTING -s 10.172.0.0/27 -j RETURN
+-A notrack-helper-PREROUTING -d 10.172.0.0/27 -j RETURN
+-A notrack-helper-PREROUTING -s 10.207.0.216/29 -j RETURN
+-A notrack-helper-PREROUTING -d 10.207.0.216/29 -j RETURN
+-A notrack-helper-PREROUTING -s 10.207.0.93/32 -j RETURN
+-A notrack-helper-PREROUTING -d 10.207.0.93/32 -j RETURN
+-A notrack-helper-PREROUTING -j NOTRACK
+
+-A OUTPUT -o icvpn -j notrack-helper-OUTPUT
+-A OUTPUT -o br-fftr -j notrack-helper-OUTPUT
+-A notrack-helper-OUTPUT -s 10.172.0.0/27 -j RETURN
+-A notrack-helper-OUTPUT -d 10.172.0.0/27 -j RETURN
+-A notrack-helper-OUTPUT -s 10.207.0.216/29 -j RETURN
+-A notrack-helper-OUTPUT -d 10.207.0.216/29 -j RETURN
+-A notrack-helper-OUTPUT -s 10.207.0.93/32 -j RETURN
+-A notrack-helper-OUTPUT -d 10.207.0.93/32 -j RETURN
+-A notrack-helper-OUTPUT -j NOTRACK
 COMMIT
 
 *mangle
@@ -59,7 +80,6 @@ COMMIT
 :INPUT ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
--A POSTROUTING -o $NIC_PUBLIC -j MASQUERADE
 COMMIT
 
 *filter
@@ -68,7 +88,7 @@ COMMIT
 :OUTPUT DROP [0:0]
 " >> $rulefile
 addrule() {
-	formatrule "$@" >> $rulefile
+        formatrule "$@" >> $rulefile
 }
 
 rulefile6="$(mktemp)"
@@ -101,7 +121,7 @@ COMMIT
 :OUTPUT ACCEPT [0:0]
 " >> $rulefile6
 addrule6() {
-	formatrule "$@" >> $rulefile6
+        formatrule "$@" >> $rulefile6
 }
 
 
@@ -134,9 +154,9 @@ addrule -A OUTPUT -s 127.0.0.1 -j ACCEPT
 iptables-save -c > $counterfile
 
 echo -n "$(grep "INPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile
-addrule -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000:10015,1723 -m comment --comment "ACC-fastd"
+addrule -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000,10001,1723 -m comment --comment "ACC-fastd"
 echo -n "$(grep "OUTPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile
-addrule -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000:10015,1723 -m comment --comment "ACC-fastd"
+addrule -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000,10001,1723 -m comment --comment "ACC-fastd"
 
 echo -n "$(grep "INPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile
 addrule -A INPUT  -i $NIC_PUBLIC -p UDP --destination-port 655 -m comment --comment "ACC-tincudp"
@@ -147,16 +167,6 @@ echo -n "$(grep "INPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rule
 addrule -A INPUT  -i $NIC_PUBLIC -p TCP --destination-port 655 -m comment --comment "ACC-tinctcp"
 echo -n "$(grep "OUTPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile
 addrule -A OUTPUT -o $NIC_PUBLIC -p TCP --source-port      655 -m comment --comment "ACC-tinctcp"
-
-echo -n "$(grep "INPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile
-addrule -A INPUT  -i $NIC_PUBLIC -p UDP --destination-port 656 -m comment --comment "ACC-tincudp"
-echo -n "$(grep "OUTPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile
-addrule -A OUTPUT -o $NIC_PUBLIC -p UDP --source-port      656 -m comment --comment "ACC-tincudp"
-
-echo -n "$(grep "INPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile
-addrule -A INPUT  -i $NIC_PUBLIC -p TCP --destination-port 656 -m comment --comment "ACC-tinctcp"
-echo -n "$(grep "OUTPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile
-addrule -A OUTPUT -o $NIC_PUBLIC -p TCP --source-port      656 -m comment --comment "ACC-tinctcp"
 
 rm $counterfile
 
@@ -170,46 +180,22 @@ addrule -A OUTPUT -p ALL -o $NIC_VPN -m state --state ESTABLISHED,RELATED -j ACC
 addrule -A INPUT -p ALL -i $NIC_IC -m state --state ESTABLISHED,RELATED -j ACCEPT
 addrule -A OUTPUT -p ALL -o $NIC_IC -m state --state ESTABLISHED,RELATED -j ACCEPT
 
-# Allow mesh --> VPN
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -j ACCEPT
-# Allow existing connections to find their way back
-addrule -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_VPN -p ALL -o $NIC_BRIDGE -m state --state ESTABLISHED,RELATED -j ACCEPT
-
-# Allow mesh <--> IC
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -j ACCEPT
-addrule -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -j ACCEPT
-
-# Allow mesh <--> public
-addrule -A FORWARD -i $NIC_PUBLIC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_PUBLIC -o $NIC_BRIDGE -j ACCEPT
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_PUBLIC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_PUBLIC -j ACCEPT
-
-# Allow mesh <--> mesh
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1334
-addrule -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -j ACCEPT
 
 # Usefull ICMP-Stuff
 for i in destination-unreachable echo-reply echo-request time-exceeded; do
-	addrule -A INPUT -p ICMP --icmp-type $i -j ACCEPT
-	addrule -A OUTPUT -p ICMP --icmp-type $i -j ACCEPT
+        addrule -A INPUT -p ICMP --icmp-type $i -j ACCEPT
+        addrule -A OUTPUT -p ICMP --icmp-type $i -j ACCEPT
 done
 
 #################################
 
 ## INPUT
 
-# TCP/UDP Port 10000 to 10015 / 10100 / 1723 (fastd)
-addrule -A INPUT -p TCP --dport 10000:10015 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10000:10015 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 10001:10015 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p UDP --dport 10001:10015 -i $NIC_PUBLIC -j ACCEPT
-
-# Baldur has had an other port announced in gluon
+# TCP/UDP Port 10000/10001/10100/1723 (fastd)
+addrule -A INPUT -p TCP --dport 10000 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10000 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 10001 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 10001 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p TCP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p TCP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
@@ -217,16 +203,13 @@ addrule -A INPUT -p UDP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 # for neso who has fastd also on port 80:
 addrule -A INPUT -p UDP --dport 80 -i $NIC_PUBLIC -j ACCEPT
 
-# TCP/UDP Port 655 (tinc) glubit
+# TCP/UDP Port 655 (tinc)
 addrule -A INPUT -p TCP --dport 655 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 655 -i $NIC_PUBLIC -j ACCEPT
-# TCP/UDP Port 655 (tinc) baldur 
 addrule -A INPUT -p TCP --dport 656 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 656 -i $NIC_PUBLIC -j ACCEPT
-
-# not-in-use anymore
-#addrule -A INPUT -p TCP --dport 755 -i $NIC_PUBLIC -j ACCEPT
-#addrule -A INPUT -p UDP --dport 755 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 755 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 755 -i $NIC_PUBLIC -j ACCEPT
 
 # TCP Port 22 (SSH)
 addrule -A INPUT -p TCP --dport 22 -i $NIC_PUBLIC -j ACCEPT
@@ -333,36 +316,15 @@ fi
 #addrule6 -t mangle -X
 
 #reject traffic to/from routers
-$ALFRED_JSON -r 158 -z | jq '.[] | select(.supernode.ipv6fw == false) | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' > /tmp/ipv6-whitelist
-grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' /var/lib/Supernodes-dynamic/iptables-whitelist >> /tmp/ipv6-whitelist
-for i in $($ALFRED_JSON -r 158 -z | jq '.[] | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' | grep -v -F -f /tmp/ipv6-whitelist); do
-	addrule6 -A INPUT -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A OUTPUT -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A FORWARD -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A FORWARD -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A INPUT -i $NIC_PUBLIC -d $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A OUTPUT -o $NIC_PUBLIC -s $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A FORWARD -i $NIC_PUBLIC -d $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A FORWARD -o $NIC_PUBLIC -s $i -j REJECT --reject-with adm-prohibited
-done
-
-addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_IC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_IC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_PUBLIC -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-addrule6 -A FORWARD -i $NIC_PUBLIC -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
-
+addrule6 -A FORWARD -j REJECT --reject-with adm-prohibited
 
 ip6tables-save -c > $counterfile
 
 echo -n "$(grep "INPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000:10015,1723 -m comment --comment "ACC-fastd"
+addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000,10001,1723 -m comment --comment "ACC-fastd"
 echo -n "$(grep "OUTPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000:10015,1723 -m comment --comment "ACC-fastd"
+addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000,10001,1723 -m comment --comment "ACC-fastd"
 
-# glubit tinc-port 655
 echo -n "$(grep "INPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
 addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP --destination-port 655 -m comment --comment "ACC-tincudp"
 echo -n "$(grep "OUTPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
@@ -372,18 +334,6 @@ echo -n "$(grep "INPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rule
 addrule6 -A INPUT  -i $NIC_PUBLIC -p TCP --destination-port 655 -m comment --comment "ACC-tinctcp"
 echo -n "$(grep "OUTPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
 addrule6 -A OUTPUT -o $NIC_PUBLIC -p TCP --source-port      655 -m comment --comment "ACC-tinctcp"
-
-# Bladur tinc-port 656
-echo -n "$(grep "INPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP --destination-port 656 -m comment --comment "ACC-tincudp"
-echo -n "$(grep "OUTPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP --source-port      656 -m comment --comment "ACC-tincudp"
-
-echo -n "$(grep "INPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A INPUT  -i $NIC_PUBLIC -p TCP --destination-port 656 -m comment --comment "ACC-tinctcp"
-echo -n "$(grep "OUTPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A OUTPUT -o $NIC_PUBLIC -p TCP --source-port      656 -m comment --comment "ACC-tinctcp"
-
 
 rm $counterfile
 
