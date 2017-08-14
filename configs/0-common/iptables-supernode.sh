@@ -156,16 +156,6 @@ addrule -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000:1
 echo -n "$(grep "OUTPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile
 addrule -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000:10015,1723 -m comment --comment "ACC-fastd"
 
-echo -n "$(grep "INPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile
-addrule -A INPUT  -i $NIC_PUBLIC -p UDP --destination-port 655 -m comment --comment "ACC-tincudp"
-echo -n "$(grep "OUTPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile
-addrule -A OUTPUT -o $NIC_PUBLIC -p UDP --source-port      655 -m comment --comment "ACC-tincudp"
-
-echo -n "$(grep "INPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile
-addrule -A INPUT  -i $NIC_PUBLIC -p TCP --destination-port 655 -m comment --comment "ACC-tinctcp"
-echo -n "$(grep "OUTPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile
-addrule -A OUTPUT -o $NIC_PUBLIC -p TCP --source-port      655 -m comment --comment "ACC-tinctcp"
-
 rm $counterfile
 
 # Established, Related
@@ -199,13 +189,6 @@ addrule -A INPUT -p UDP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 # for neso who has fastd also on port 80:
 addrule -A INPUT -p UDP --dport 80 -i $NIC_PUBLIC -j ACCEPT
 
-# TCP/UDP Port 655 (tinc) NO tinc anymore
-#addrule -A INPUT -p TCP --dport 655 -i $NIC_PUBLIC -j ACCEPT
-#addrule -A INPUT -p UDP --dport 655 -i $NIC_PUBLIC -j ACCEPT
-#addrule -A INPUT -p TCP --dport 656 -i $NIC_PUBLIC -j ACCEPT
-#addrule -A INPUT -p UDP --dport 656 -i $NIC_PUBLIC -j ACCEPT
-#addrule -A INPUT -p TCP --dport 755 -i $NIC_PUBLIC -j ACCEPT
-#addrule -A INPUT -p UDP --dport 755 -i $NIC_PUBLIC -j ACCEPT
 
 # TCP Port 22 (SSH)
 addrule -A INPUT -p TCP --dport 22 -i $NIC_PUBLIC -j ACCEPT
@@ -320,16 +303,6 @@ echo -n "$(grep "INPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefi
 addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000:10015,1723 -m comment --comment "ACC-fastd"
 echo -n "$(grep "OUTPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile6
 addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000:10015,1723 -m comment --comment "ACC-fastd"
-
-echo -n "$(grep "INPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP --destination-port 655 -m comment --comment "ACC-tincudp"
-echo -n "$(grep "OUTPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP --source-port      655 -m comment --comment "ACC-tincudp"
-
-echo -n "$(grep "INPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A INPUT  -i $NIC_PUBLIC -p TCP --destination-port 655 -m comment --comment "ACC-tinctcp"
-echo -n "$(grep "OUTPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A OUTPUT -o $NIC_PUBLIC -p TCP --source-port      655 -m comment --comment "ACC-tinctcp"
 
 rm $counterfile
 
