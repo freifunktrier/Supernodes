@@ -1,6 +1,7 @@
 # Supernodes
 
-Our aim is to have our network cut into different subnets. Therefore we planed our IP-Ranges according to GW-Datentabelle.ods 
+Our aim is to have our network cut into different subnets. Therefore we planed our IP-Ranges according to GW-Datentabelle.ods  
+
 This branch works out the config for this.
 
 
