@@ -19,7 +19,7 @@ Baldur and Glubit are our only
 All other Supernodes just collecting the connections from our fastd-clients.  
 
 On top of this config we add some interfaces and Routings. 
-We start with 5 segments and so very GW has 5 fastd-connections to every other GW. 
+We start with 5 segments and so every GW has 5 fastd-connections to every other GW. 
 
 
 
