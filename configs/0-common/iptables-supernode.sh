@@ -1,7 +1,7 @@
 #!/bin/bash
 NIC_PUBLIC=eth0
 NIC_VPN=tun0
-NIC_BRIDGE=br-fftr
+NIC_BRIDGE=br-fftr+
 NIC_IC=icvpn
 ALFRED_JSON=""
 if [ -e "/var/lib/Supernodes/configs/$(hostname)/iptables" ]; then
@@ -187,25 +187,25 @@ addrule -A INPUT -p UDP --dport 10100 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p TCP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 # for neso who has fastd also on port 80:
-addrule -A INPUT -p UDP --dport 80 -i $NIC_PUBLIC -j ACCEPT
+# addrule -A INPUT -p UDP --dport 80 -i $NIC_PUBLIC -j ACCEPT
 
 
 # TCP Port 22 (SSH)
 addrule -A INPUT -p TCP --dport 22 -i $NIC_PUBLIC -j ACCEPT
 
 # Allow DNS from IC and Mesh
-addrule -A INPUT -p UDP --dport 53 -i $NIC_IC -j ACCEPT
-addrule -A INPUT -p TCP --dport 53 -i $NIC_IC -j ACCEPT
-addrule -A INPUT -p UDP --dport 53 -i $NIC_BRIDGE -j ACCEPT
-addrule -A INPUT -p TCP --dport 53 -i $NIC_BRIDGE -j ACCEPT
+#addrule -A INPUT -p UDP --dport 53 -i $NIC_IC -j ACCEPT
+#addrule -A INPUT -p TCP --dport 53 -i $NIC_IC -j ACCEPT
+#addrule -A INPUT -p UDP --dport 53 -i $NIC_BRIDGE -j ACCEPT
+#addrule -A INPUT -p TCP --dport 53 -i $NIC_BRIDGE -j ACCEPT
 
 # Allow HTTP from IC and Mesh
-addrule -A INPUT -p UDP --dport 80 -i $NIC_IC -j ACCEPT
-addrule -A INPUT -p TCP --dport 80 -i $NIC_IC -j ACCEPT
+#addrule -A INPUT -p UDP --dport 80 -i $NIC_IC -j ACCEPT
+#addrule -A INPUT -p TCP --dport 80 -i $NIC_IC -j ACCEPT
 addrule -A INPUT -p UDP --dport 80 -i $NIC_BRIDGE -j ACCEPT
 addrule -A INPUT -p TCP --dport 80 -i $NIC_BRIDGE -j ACCEPT
 
-addrule -A INPUT -p TCP --dport 443 -i $NIC_IC -j ACCEPT
+#addrule -A INPUT -p TCP --dport 443 -i $NIC_IC -j ACCEPT
 addrule -A INPUT -p TCP --dport 443 -i $NIC_BRIDGE -j ACCEPT
 
 # Allow INPUT and OUTPUT Bridge Interface
@@ -214,32 +214,32 @@ addrule -A INPUT -i $NIC_BRIDGE -j ACCEPT
 addrule -A OUTPUT -o $NIC_BRIDGE -j ACCEPT
 
 #DHCP out to serve our clients
-addrule -A INPUT  -p UDP -i $NIC_BRIDGE --sport 68 --dport 67 -j ACCEPT
+# addrule -A INPUT  -p UDP -i $NIC_BRIDGE --sport 68 --dport 67 -j ACCEPT
 
 #allow IC-BGP
-addrule -A INPUT -p TCP -i $NIC_IC --dport 179 -j ACCEPT
-addrule -A INPUT -p UDP -i $NIC_IC --dport 179 -j ACCEPT
+#addrule -A INPUT -p TCP -i $NIC_IC --dport 179 -j ACCEPT
+#addrule -A INPUT -p UDP -i $NIC_IC --dport 179 -j ACCEPT
 
 #allow 6in4
 addrule -A INPUT -p ipv6 -i $NIC_PUBLIC -j ACCEPT
 ## OUTPUT
 
 #DNS
-addrule -A OUTPUT -p UDP -o $NIC_IC --dport 53 -j ACCEPT
-addrule -A OUTPUT -p TCP -o $NIC_IC --dport 53 -j ACCEPT
+#addrule -A OUTPUT -p UDP -o $NIC_IC --dport 53 -j ACCEPT
+#addrule -A OUTPUT -p TCP -o $NIC_IC --dport 53 -j ACCEPT
 addrule -A OUTPUT -p UDP -o $NIC_PUBLIC --dport 53 -j ACCEPT
 addrule -A OUTPUT -p TCP -o $NIC_PUBLIC --dport 53 -j ACCEPT
 
 #DHCP out to serve our clients
-addrule -A OUTPUT -p UDP -o $NIC_BRIDGE --sport 67 --dport 68 -j ACCEPT
+#addrule -A OUTPUT -p UDP -o $NIC_BRIDGE --sport 67 --dport 68 -j ACCEPT
 
 # allow every TCP/UDP output on public, because tinc will use any port any city decides to use to connect to that city
 addrule -A OUTPUT -p TCP -o $NIC_PUBLIC -j ACCEPT
 addrule -A OUTPUT -p UDP -o $NIC_PUBLIC -j ACCEPT
 
 # allow IC-BGP
-addrule -A OUTPUT -p TCP -o $NIC_IC --dport 179 -j ACCEPT
-addrule -A OUTPUT -p UDP -o $NIC_IC --dport 179 -j ACCEPT
+#addrule -A OUTPUT -p TCP -o $NIC_IC --dport 179 -j ACCEPT
+#addrule -A OUTPUT -p UDP -o $NIC_IC --dport 179 -j ACCEPT
 
 #allow 6in4
 addrule -A OUTPUT -p ipv6 -o $NIC_PUBLIC -j ACCEPT
