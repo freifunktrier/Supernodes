@@ -28,6 +28,6 @@
 ##ip route add 172.31.240.0/20 dev tun0 table VPN
 
 #enable forwarding
-echo 1 > /proc/sys/net/ipv4/ip_forward
-echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
+#echo 1 > /proc/sys/net/ipv4/ip_forward
+#echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
 
