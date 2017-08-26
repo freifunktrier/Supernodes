@@ -12,8 +12,8 @@
 # By default this script does nothing.
 
 #initialise firewall
-#/var/lib/Supernodes/configs/0-common/iptables.sh
-   # this bash does not exist anymore. As we do a cron on the iptables-bash, no need for this here
+/var/lib/Supernodes/configs/0-common/iptables-supernode.sh
+
 
 #intialise routing
 #/var/lib/Supernodes/configs/0-common/setup-routes.sh

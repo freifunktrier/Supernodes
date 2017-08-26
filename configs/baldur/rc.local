@@ -12,11 +12,11 @@
 # By default this script does nothing.
 
 #initialise firewall
-#/var/lib/Supernodes/configs/0-common/iptables.sh
-   # this bash does not exist anymore. As we do a cron on the iptables-bash, no need for this here
+/var/lib/Supernodes/configs/0-common/iptables-berlin.sh
+
 
 #intialise routing
-#/var/lib/Supernodes/configs/0-common/setup-routes.sh
+# /var/lib/Supernodes/configs/0-common/setup-routes.sh
   # no routing needed after rebuild of our infrastructure anymore.
   # Is only used at the moment for switch on the forwarding. But I switch it on in 11-custom-sysctl.conf
   # If that does not do the trick, run setup-routes.sh again
