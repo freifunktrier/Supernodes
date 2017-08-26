@@ -3,18 +3,6 @@ NIC_PUBLIC=eth0
 NIC_VPN=tun0
 NIC_BRIDGE=br-fftr+
 NIC_IC=icvpn
-ALFRED_JSON=""
-if [ -e "/var/lib/Supernodes/configs/$(hostname)/iptables" ]; then
-	. "/var/lib/Supernodes/configs/$(hostname)/iptables"
-fi
-
-if [ ! -f "$ALFRED_JSON" ]; then
-	ALFRED_JSON="/root/alfred-json/src/alfred-json"
-fi
-
-if [ ! -f "$ALFRED_JSON" ]; then
-	ALFRED_JSON="/usr/local/src/alfred-json/build/src/alfred-json"
-fi
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
@@ -312,20 +300,6 @@ fi
 #addrule6 -X
 #addrule6 -t nat -X
 #addrule6 -t mangle -X
-
-#reject traffic to/from routers
-$ALFRED_JSON -r 158 -z | jq '.[] | select(.supernode.ipv6fw == false) | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' > /tmp/ipv6-whitelist
-grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' /var/lib/Supernodes-dynamic/iptables-whitelist >> /tmp/ipv6-whitelist
-for i in $($ALFRED_JSON -r 158 -z | jq '.[] | {network} | .[] | {addresses} | .[] | .[]' | grep -E -o '2001:bf7:fc0f:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}' | grep -v -F -f /tmp/ipv6-whitelist); do
-	addrule6 -A INPUT -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A OUTPUT -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A FORWARD -i $NIC_IC -d $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A FORWARD -o $NIC_IC -s $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A INPUT -i $NIC_PUBLIC -d $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A OUTPUT -o $NIC_PUBLIC -s $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A FORWARD -i $NIC_PUBLIC -d $i -j REJECT --reject-with adm-prohibited
-	addrule6 -A FORWARD -o $NIC_PUBLIC -s $i -j REJECT --reject-with adm-prohibited
-done
 
 addrule6 -A FORWARD -i $NIC_BRIDGE -o $NIC_VPN -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
 addrule6 -A FORWARD -i $NIC_VPN -o $NIC_BRIDGE -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1314
