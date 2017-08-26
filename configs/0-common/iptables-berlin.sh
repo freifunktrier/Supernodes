@@ -4,6 +4,9 @@ NIC_VPN=tun0
 NIC_BRIDGE=br-fftr+
 NIC_IC=icvpn
 
+if [ -e "/var/lib/Supernodes/configs/$(hostname)/iptables" ]; then
+	. "/var/lib/Supernodes/configs/$(hostname)/iptables"
+fi
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 #Thank you http://www.semicomplete.com/blog/geekery/atomic-iptables-changes-and-not-dropping-packets.html
