@@ -3,18 +3,11 @@ NIC_PUBLIC=eth0
 NIC_VPN=tun0
 NIC_BRIDGE=br-fftr+
 NIC_IC=icvpn
-ALFRED_JSON=""
+
 if [ -e "/var/lib/Supernodes/configs/$(hostname)/iptables" ]; then
 	. "/var/lib/Supernodes/configs/$(hostname)/iptables"
 fi
 
-if [ ! -f "$ALFRED_JSON" ]; then
-	ALFRED_JSON="/root/alfred-json/src/alfred-json"
-fi
-
-if [ ! -f "$ALFRED_JSON" ]; then
-	ALFRED_JSON="/usr/local/src/alfred-json/build/src/alfred-json"
-fi
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
