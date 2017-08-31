@@ -320,14 +320,14 @@ addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000:
 echo -n "$(grep "OUTPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile6
 addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000:10015,1723 -m comment --comment "ACC-fastd"
 
-echo -n "$(grep "INPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile
+echo -n "$(grep "INPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
 addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-port 655,656 -m comment --comment "ACC-tincudp"
-echo -n "$(grep "OUTPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile
+echo -n "$(grep "OUTPUT.*ACC-tincudp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
 addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-port      655,656 -m comment --comment "ACC-tincudp"
 
-echo -n "$(grep "INPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile
+echo -n "$(grep "INPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
 addrule6 -A INPUT  -i $NIC_PUBLIC -p TCP -m multiport --destination-port 655,656 -m comment --comment "ACC-tinctcp"
-echo -n "$(grep "OUTPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile
+echo -n "$(grep "OUTPUT.*ACC-tinctcp" $counterfile | grep -o "\[.*\]") " >> $rulefile6
 addrule6 -A OUTPUT -o $NIC_PUBLIC -p TCP -m multiport --source-port      655,656 -m comment --comment "ACC-tinctcp"
 
 rm $counterfile
