@@ -192,11 +192,16 @@ addrule -A INPUT -p TCP --dport 22 -i $NIC_PUBLIC -j ACCEPT
 #addrule -A INPUT -p UDP --dport 53 -i $NIC_BRIDGE -j ACCEPT
 #addrule -A INPUT -p TCP --dport 53 -i $NIC_BRIDGE -j ACCEPT
 
-# Allow HTTP from IC and Mesh
-#addrule -A INPUT -p UDP --dport 80 -i $NIC_IC -j ACCEPT
-#addrule -A INPUT -p TCP --dport 80 -i $NIC_IC -j ACCEPT
+# Allow HTTP from NIC_PUBLIC and Mesh
+addrule -A INPUT -p UDP --dport 80 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p TCP --dport 80 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 80 -i $NIC_BRIDGE -j ACCEPT
 addrule -A INPUT -p TCP --dport 80 -i $NIC_BRIDGE -j ACCEPT
+
+# Allow Hopglass-Server on  nic_public
+#addrule -A INPUT -p UDP --dport 4000 -i $NIC_PUBLIC -j ACCEPT
+#addrule -A INPUT -p TCP --dport 4000 -i $NIC_PUBLIC -j ACCEPT
+
 
 #addrule -A INPUT -p TCP --dport 443 -i $NIC_IC -j ACCEPT
 addrule -A INPUT -p TCP --dport 443 -i $NIC_BRIDGE -j ACCEPT
