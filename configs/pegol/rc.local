@@ -14,6 +14,9 @@
 #initialise firewall
 /var/lib/Supernodes/configs/pegol/iptables-supernode.sh
 
+# Start Hopglass Server
+systemctl start hopglass-server@bat0
+
 #intialise routing
 #/var/lib/Supernodes/configs/0-common/setup-routes.sh
   # no routing needed after rebuild of our infrastructure anymore.
