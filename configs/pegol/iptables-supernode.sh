@@ -1,12 +1,8 @@
 #!/bin/bash
-NIC_PUBLIC=eth0
+NIC_PUBLIC=ens3
 NIC_VPN=tun0
 NIC_BRIDGE=br-fftr+
 NIC_IC=icvpn
-
-if [ -e "/var/lib/Supernodes/configs/$(hostname)/iptables" ]; then
-	. "/var/lib/Supernodes/configs/$(hostname)/iptables"
-fi
 
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -293,14 +289,17 @@ fi
 #addrule6 -t mangle -X
 
 #reject traffic to/from routers
-addrule6 -A FORWARD -j REJECT --reject-with adm-prohibited
+#addrule6 -A FORWARD -j REJECT --reject-with adm-prohibited
 
 ip6tables-save -c > $counterfile
+addrule6 -A INPUT -j ACCEPT
+addrule6 -A FORWARD -j ACCEPT
+addrule6 -A OUTPUT -j ACCEPT
 
 echo -n "$(grep "INPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000:10015,1723 -m comment --comment "ACC-fastd"
+addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000:10015 -m comment --comment "ACC-fastd"
 echo -n "$(grep "OUTPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile6
-addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000:10015,1723 -m comment --comment "ACC-fastd"
+addrule6 -A OUTPUT -o $NIC_PUBLIC -p UDP -m multiport --source-ports      10000:10015 -m comment --comment "ACC-fastd"
 
 rm $counterfile
 
