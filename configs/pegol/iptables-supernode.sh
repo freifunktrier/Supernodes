@@ -292,9 +292,6 @@ fi
 #addrule6 -A FORWARD -j REJECT --reject-with adm-prohibited
 
 ip6tables-save -c > $counterfile
-addrule6 -A INPUT -j ACCEPT
-addrule6 -A FORWARD -j ACCEPT
-addrule6 -A OUTPUT -j ACCEPT
 
 echo -n "$(grep "INPUT.*ACC-fastd" $counterfile | grep -o "\[.*\]") " >> $rulefile6
 addrule6 -A INPUT  -i $NIC_PUBLIC -p UDP -m multiport --destination-ports 10000:10015 -m comment --comment "ACC-fastd"
