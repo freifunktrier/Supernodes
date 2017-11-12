@@ -14,7 +14,7 @@
 # is reset on reboot from hostsystem to vps451818
 hostname pegol
 
-# If pegol shopuld be available with its OVH-IPv6
+# If pegol should be available with its OVH-IPv6
 # Set default route IPv6 via ens3
 #/sbin/ip -6 route add 2001:41d0:401:3100::1 dev ens3
 #/sbin/ip -6 route add default via 2001:41d0:401:3100::1 dev ens3
@@ -32,7 +32,7 @@ systemctl start hopglass-server@bat0
   # Is only used at the moment for switch on the forwarding. But I switch it on in 11-custom-sysctl.conf
   # If that does not do the trick, run setup-routes.sh again
 
-#initialise batman ... not needed. Is done by fastd 
+#initialise batman ... not needed. Is done by fastd
 #ifup bat0
 
 
