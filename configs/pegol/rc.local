@@ -14,9 +14,9 @@
 # is reset on reboot from hostsystem to vps451818
 hostname pegol
 
-# 
-/sbin/ip -6 route add 2001:41d0:401:3100::1 dev ens3
-/sbin/ip -6 route add default via 2001:41d0:401:3100::1 dev ens3
+# If pegol shopuld be available with its OVH-IPv6
+#/sbin/ip -6 route add 2001:41d0:401:3100::1 dev ens3
+#/sbin/ip -6 route add default via 2001:41d0:401:3100::1 dev ens3
 
 
 #initialise firewall
