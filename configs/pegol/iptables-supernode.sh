@@ -178,6 +178,10 @@ addrule -A INPUT -p UDP --dport 1723 -i $NIC_PUBLIC -j ACCEPT
 # for neso who has fastd also on port 80:
 # addrule -A INPUT -p UDP --dport 80 -i $NIC_PUBLIC -j ACCEPT
 
+#znc
+addrule -A INPUT -p TCP --dport 1030 -i $NIC_PUBLIC -j ACCEPT
+addrule -A INPUT -p UDP --dport 1030 -i $NIC_PUBLIC -j ACCEPT
+
 
 # TCP Port 22 (SSH)
 addrule -A INPUT -p TCP --dport 22 -i $NIC_PUBLIC -j ACCEPT
@@ -194,9 +198,8 @@ addrule -A INPUT -p TCP --dport 80 -i $NIC_PUBLIC -j ACCEPT
 addrule -A INPUT -p UDP --dport 80 -i $NIC_BRIDGE -j ACCEPT
 addrule -A INPUT -p TCP --dport 80 -i $NIC_BRIDGE -j ACCEPT
 
-# Allow Hopglass-Server
-addrule -A INPUT -p UDP --dport 4000 -i $NIC_PUBLIC -j ACCEPT
-addrule -A INPUT -p TCP --dport 4000 -i $NIC_PUBLIC -j ACCEPT
+# Allow Hopglass-Server to public
+# addrule -A INPUT -p TCP --dport 4000 -i $NIC_PUBLIC -j ACCEPT
 
 
 #addrule -A INPUT -p TCP --dport 443 -i $NIC_IC -j ACCEPT

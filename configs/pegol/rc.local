@@ -23,6 +23,11 @@ hostname pegol
 #initialise firewall
 /var/lib/Supernodes/configs/pegol/iptables-supernode.sh
 
+# Standard-IPv6-Route out via Baldur
+# Public-Server-IPv6:  2001:bf7:fc0f::19 
+# /sbin/ip -6 route add default via  2001:bf7:fc0f::14 dev br-fftr
+# ist jetzt in br-fftr.conf konfiguriert
+
 # Start Hopglass Server
 systemctl start hopglass-server@bat0
 
