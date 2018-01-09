@@ -29,7 +29,7 @@ hostname pegol
 # ist jetzt in br-fftr.conf konfiguriert
 
 # Start Hopglass Server
-systemctl start hopglass-server@bat0
+# systemctl start hopglass-server@bat0
 
 #intialise routing
 #/var/lib/Supernodes/configs/0-common/setup-routes.sh
