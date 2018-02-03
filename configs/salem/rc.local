@@ -11,8 +11,11 @@
 #
 # By default this script does nothing.
 
+hostname salem
+
 #initialise firewall
 /var/lib/Supernodes/configs/0-common/iptables-supernode.sh
+
 
 #intialise routing
 #/var/lib/Supernodes/configs/0-common/setup-routes.sh
