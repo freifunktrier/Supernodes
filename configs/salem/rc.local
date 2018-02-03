@@ -11,7 +11,7 @@
 #
 # By default this script does nothing.
 
-hostname salem
+# hostname salem
 
 #initialise firewall
 /var/lib/Supernodes/configs/0-common/iptables-supernode.sh
