@@ -23,5 +23,8 @@
 #initialise batman ... not needed. Is done by fastd 
 #ifup bat0
 
+# Set default IPv6-Route to eth0 
+# /sbin/ip -6 route add default dev eth0 src 2a01:4f8:1c0c:4e67::1
+
 
 exit 0
