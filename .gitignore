@@ -1,5 +1,6 @@
 *.bak
 configs/0-common/fastd/gw-errai_old
 configs/0-common/fastd/gw-naos_old
+configs/pegol_OVH
 .~lock.GW-Datentabelle.ods#
 configs/baldur/copy von iptables.txt
