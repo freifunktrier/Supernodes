@@ -1,0 +1,27 @@
+#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+
+# is reset on reboot from hostsystem to vps451818
+# hostname pegol
+
+
+#initialise firewall
+/var/lib/Supernodes/configs/pegol2/iptables-supernode.sh
+
+# Standard-IPv6-Route out via Baldur
+# Public-Server-IPv6:  2001:bf7:fc0f::19 
+# /sbin/ip -6 route add default via  2001:bf7:fc0f::14 dev br-fftr
+# ist jetzt in br-fftr.conf konfiguriert
+
+
+exit 0
