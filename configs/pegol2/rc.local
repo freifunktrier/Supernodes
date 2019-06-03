@@ -11,7 +11,7 @@
 #
 # By default this script does nothing.
 
-# is reset on reboot from hostsystem to vps451818
+# is reset on reboot from hostsystem
 # hostname pegol
 
 

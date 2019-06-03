@@ -204,6 +204,7 @@ addrule -A INPUT -p TCP --dport 80 -i $NIC_BRIDGE -j ACCEPT
 
 #addrule -A INPUT -p TCP --dport 443 -i $NIC_IC -j ACCEPT
 addrule -A INPUT -p TCP --dport 443 -i $NIC_BRIDGE -j ACCEPT
+addrule -A INPUT -p TCP --dport 443 -i $NIC_PUBLIC -j ACCEPT
 
 # Allow INPUT and OUTPUT Bridge Interface
 #TODO: remove this rules, add allow rules for established+related connections, ping, speedtest, 80tcp, 53udp/tcp, router-advertisement-zeug, ntp
