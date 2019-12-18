@@ -1,0 +1,28 @@
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+  address 45.14.233.135
+  network 45.14.233.0
+  netmask 255.255.255.0
+  mtu 1500
+  gateway 45.14.233.1
+
+iface eth0 inet6 static
+  address 2a0e:1580:1000::2dff:fe0e:e987
+  netmask 64
+  autoconf 0
+  accept_ra 0
+  mtu 1500
+  gateway 2a0e:1580:1000::1
+
+iface eth0 inet6 static
+  address 2a0e:1580:1000::2dff:fe0e:e987
+  netmask 64
+  autoconf 0
+  accept_ra 0
+  mtu 1500
+
+source /etc/network/interfaces.d/*.cfg
+
