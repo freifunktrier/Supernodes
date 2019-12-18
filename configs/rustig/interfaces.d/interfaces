@@ -25,4 +25,3 @@ iface eth0 inet6 static
   mtu 1500
 
 source /etc/network/interfaces.d/*.cfg
-
