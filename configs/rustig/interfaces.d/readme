@@ -1,4 +1,4 @@
-OpneNebula kopiert bei jedem Reboot die original Netzwerk-Config in /etc/network
+OpenNebula kopiert bei jedem Reboot die original Netzwerk-Config in /etc/network
 Daher ist es nicht möglich die Netzwerk-Config für eth0 dauerhaft im Git-Repo /supernodes  zu editieren.
 Änderungen durch ansible sind ebenfalls nach dem reboot verloren.
 Da die original Netzwerkkonfig in der Datei "interfaces" am Ende einen Verweis auf sie sources ../*.cfg beinhaltet, 
