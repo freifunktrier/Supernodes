@@ -12,7 +12,7 @@
 # By default this script does nothing.
 
 #initialise firewall
-/var/lib/Supernodes/configs/0-common/iptables-berlin.sh
+/var/lib/Supernodes/configs/0-common/iptables-exit.sh
 
 #intialise routing
 #/var/lib/Supernodes/configs/0-common/setup-routes.sh
