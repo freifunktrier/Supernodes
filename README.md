@@ -13,10 +13,11 @@ Baldur and Glubit are our only
 Baldur, Glubit, Rustig and Kuga are
 - Batman-Gateways 
 - GWs doing NAT
-- IPv4-Gateways to the Internet 
+- IPv4-gateways to the internet 
+- IPv6-gateways to the internet 
 - GWs doing bgp 
 - GWs doing bgp6 
-- GWs doing DHCP-Server (Range 10.172.0.0 - 10.172.15.255)
+- GWs doing DHCP-server
 - GWs doing RA
 - GWs doing routing between our subnet segments
 
