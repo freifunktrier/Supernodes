@@ -1,10 +1,10 @@
 # Supernodes
 
 We use different typs of Gateways. 
-Glubit an Baldur (Berlin) just have fastd-sessions to all other Gateways but no Client-fastd-sessions. 
-Pegol just do monitoring and firmware-mirroring but no client-fastd-sessions. 
-Rustig and Kuga have BGP- and BGP6-sessions to our 2. Provider and do Client-fastd-sessions as GW04 and GW05 since our gluon 0.14.0 in 2020  
-All ohter GWs just do Client-fastd-sessions and forward all traffic to Glubit, Baldur, Rustig or Kuga. 
+Glubit an Baldur (Berlin) just have fastd-sessions to all other Gateways but no Client-fastd-sessions.  
+Pegol just do monitoring and firmware-mirroring but no client-fastd-sessions.  
+Rustig and Kuga have BGP- and BGP6-sessions to our 2. Provider and do Client-fastd-sessions as GW04 and GW05 since our gluon 0.14.0 in 2020.  
+All ohter GWs just do Client-fastd-sessions and forward all traffic to Glubit, Baldur, Rustig or Kuga.  
 
 ## Segmentation
 Baldur and Glubit are our only 
