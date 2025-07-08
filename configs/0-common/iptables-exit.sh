@@ -1,5 +1,7 @@
 #!/bin/bash
 NIC_PUBLIC=ens3
+# BALDUR:
+NIC_PUBLIC=enp6s18
 NIC_VPN=tun0
 NIC_BRIDGE=br-fftr+
 NIC_IC=icvpn
